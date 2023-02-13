@@ -1,18 +1,26 @@
-# YAML 1.2
----
-cff-version: "1.1.0"
-title: "bird_cloud_gnn"
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+cff-version: 1.2.0
+title: bird-cloud-gnn
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
 authors:
-  -
+  - given-names: Olga
     family-names: Lyashevska
-    given-names: Olga
-    orcid: "https://orcid.org/0000-0000-0000-0000"
-date-released: 20??-MM-DD
-doi: <insert your DOI here>
-version: "0.1.0"
-repository-code: "git@github.com:point-cloud-radar/bird-cloud-gnn"
+    email: o.lyashevska@esciencecenter.nl
+    affiliation: Netherlands eScience Center
+    orcid: 'https://orcid.org/0000-0002-8686-8550'
+  - given-names: Abel
+    family-names: Soares Siqueira
+    email: abel.s.siqueira@gmail.com
+    affiliation: Netherlands eScience Center
+    orcid: 'https://orcid.org/0000-0003-4451-281X'
+repository-code: 'https://github.com/point-cloud-radar/bird-cloud-gnn'
 keywords:
-  - gnn
   - point cloud
-message: "If you use this software, please cite it using these metadata."
+  - graph neural network
+  - bird identification
 license: Apache-2.0
+
