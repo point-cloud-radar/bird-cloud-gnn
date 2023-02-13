@@ -1,0 +1,18 @@
+# YAML 1.2
+---
+cff-version: "1.1.0"
+title: "bird_cloud_gnn"
+authors:
+  -
+    family-names: Lyashevska
+    given-names: Olga
+    orcid: "https://orcid.org/0000-0000-0000-0000"
+date-released: 20??-MM-DD
+doi: <insert your DOI here>
+version: "0.1.0"
+repository-code: "git@github.com:point-cloud-radar/bird-cloud-gnn"
+keywords:
+  - gnn
+  - point cloud
+message: "If you use this software, please cite it using these metadata."
+license: Apache-2.0
