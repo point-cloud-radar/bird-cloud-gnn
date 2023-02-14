@@ -153,7 +153,7 @@ In a new terminal, without an activated virtual environment or an env directory:
 cd $(mktemp -d bird_cloud_gnn.XXXXXX)
 
 # fresh git clone ensures the release has the state of origin/main branch
-git clone git@github.com:point-cloud-radar/bird-cloud-gnn .
+git clone https://github.com/point-cloud-radar/bird-cloud-gnn .
 
 # prepare a clean virtual environment and activate it
 python3 -m venv env
@@ -211,4 +211,4 @@ twine upload dist/*
 
 ### (3/3) GitHub
 
-Don't forget to also make a [release on GitHub](git@github.com:point-cloud-radar/bird-cloud-gnn/releases/new). If your repository uses the GitHub-Zenodo integration this will also trigger Zenodo into making a snapshot of your repository and sticking a DOI on it.
+Don't forget to also make a [release on GitHub](https://github.com/point-cloud-radar/bird-cloud-gnn/releases/new). If your repository uses the GitHub-Zenodo integration this will also trigger Zenodo into making a snapshot of your repository and sticking a DOI on it.

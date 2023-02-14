@@ -19,7 +19,7 @@ git init
 git add --all
 git commit -m "first commit"
 git branch -M main
-git remote add origin git@github.com:point-cloud-radar/bird-cloud-gnn
+git remote add origin git@github.com/point-cloud-radar/bird-cloud-gnn
 ```
 
 ## Push the initial commit to a new repo on GitHub
@@ -35,7 +35,7 @@ git push --set-upstream origin main
 ## Check automatically generated issues
 
 A short while after you push your commits to GitHub for the first time, a few issues outlining next steps will added
-automatically ([here](git@github.com:point-cloud-radar/bird-cloud-gnn/issues?q=author%3Aapp%2Fgithub-actions)). Resolve them to complete the
+automatically ([here](https://github.com/point-cloud-radar/bird-cloud-gnn/issues?q=author%3Aapp%2Fgithub-actions)). Resolve them to complete the
 setup of your repository.
 
 ## Project development documentation
