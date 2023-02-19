@@ -29,7 +29,7 @@ class GCN(nn.Module):
         Returns:
             The self object
         """
-        super()
+        super().__init__()
         self.conv1 = GraphConv(in_feats, h_feats)
         self.conv2 = GraphConv(h_feats, num_classes)
 
