@@ -83,10 +83,12 @@ isort --recursive bird_cloud_gnn
 
 To fix readability of your code style you can use [yapf](https://github.com/google/yapf).
 
-You can enable automatic linting with `prospector` and `isort` on commit by enabling the git hook from `.githooks/pre-commit`, like so:
+## Pre-commit
+
+You can enable automatic linting by install [`pre-commit`](https://pre-commit.com).
 
 ```shell
-git config --local core.hooksPath .githooks
+pre-commit install
 ```
 
 ## Generating the API docs
