@@ -26,7 +26,7 @@ class RadarDataset(DGLDataset):
         features (array of str): List of features expected to be present at every CSV file.
         target (str): Target column. 0, 1 or missing expected.
         max_distance (float): Maximum distance to look for neighbours.
-        min_neighbours (int): If a point has less than this amount of neighbours, if is ignored.
+        min_neighbours (int): If a point has less than this amount of neighbours, it is ignored.
     """
 
     # pylint: disable=too-many-arguments, too-many-locals
@@ -43,7 +43,7 @@ class RadarDataset(DGLDataset):
 
         Args:
             data_folder (str): Folder with the CSV files.
-            features (array of str): List of features expected to be present at every CSV file.
+            features (array of str): List of features expected to be present in every CSV file.
             target (str): Target column. 0, 1 or missing expected.
             max_distance (float, optional): Maximum distance to look for neighbours. Defaults to
                 500.0.
