@@ -6,8 +6,7 @@ from bird_cloud_gnn.fake import generate_data
 
 
 def test_generate_data(tmp_path):
-    """Tests basic information about the generated data
-    """
+    """Tests basic information about the generated data"""
     filename = tmp_path / "fake_data.csv"
     df = generate_data(
         filename=filename,
@@ -22,18 +21,31 @@ def test_generate_data(tmp_path):
     assert df.range.max() <= 2.3
     assert sorted(df.azimuth.unique()) == [0.5, 90.5, 180.5, 270.5]
     assert sorted(df.elevation.unique()) == [0, 30, 60]
-    for feat in ['feat1', 'feat2', 'feat3']:
+    for feat in ["feat1", "feat2", "feat3"]:
         assert df[feat].min() >= 0
         assert df[feat].max() <= 1
-    assert (df.columns == [
-        'range', 'azimuth', 'elevation', 'useless_feature', 'x', 'y', 'z',
-        'feat1', 'feat2', 'feat3', 'class'
-    ]).all()
+    assert (
+        df.columns
+        == [
+            "range",
+            "azimuth",
+            "elevation",
+            "useless_feature",
+            "x",
+            "y",
+            "z",
+            "feat1",
+            "feat2",
+            "feat3",
+            "class",
+        ]
+    ).all()
     assert df.notna().all(axis=None)
     df2 = pd.read_csv(filename)
 
     assert (np.abs(df2 - df) < 1e-12).all(
-        axis=None)  # Round off error might occur saving the file!
+        axis=None
+    )  # Round off error might occur saving the file!
 
     df = generate_data(
         filename=None,
