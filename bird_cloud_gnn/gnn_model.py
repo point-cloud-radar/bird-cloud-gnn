@@ -14,7 +14,7 @@ class GCN(nn.Module):
     A two-layer GCN is constructed from input dimension, hidden dimensions and number of classes.
     Each layer computes new node representations by aggregating neighbor information.
     """
-    def __init__(self, in_feats, h_feats, num_classes):
+    def __init__(self, in_feats: int, h_feats: int, num_classes: int):
         """
         The __init__ function is the constructor for a class. It is called when an object of that class is instantiated.
         It can have multiple arguments and it will always be called before __new__().
@@ -30,6 +30,9 @@ class GCN(nn.Module):
             The self object
         """
         super().__init__()
+        self.in_feats = in_feats
+        self.h_feats = h_feats
+        self.num_classes = num_classes
         self.conv1 = GraphConv(in_feats, h_feats)
         self.conv2 = GraphConv(h_feats, num_classes)
 
