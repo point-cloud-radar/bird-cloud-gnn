@@ -30,9 +30,6 @@ def test_gnn_model(setup_dataset):
         drop_last=False,
     )
 
-    it = iter(train_dataloader)
-    batched_graph, labels = next(it)
-
     model = GCN(len(setup_dataset.features), 16, 2)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 
