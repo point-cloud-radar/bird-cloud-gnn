@@ -71,14 +71,14 @@ development tools installed.
 prospector
 
 # recursively check import style for the bird_cloud_gnn module only
-isort --recursive --check-only bird_cloud_gnn
+isort --check-only bird_cloud_gnn
 
 # recursively check import style for the bird_cloud_gnn module only and show
 # any proposed changes as a diff
-isort --recursive --check-only --diff bird_cloud_gnn
+isort --check-only --diff bird_cloud_gnn
 
 # recursively fix import style for the bird_cloud_gnn module only
-isort --recursive bird_cloud_gnn
+isort bird_cloud_gnn
 ```
 
 To fix readability of your code style you can use [yapf](https://github.com/google/yapf).
@@ -90,6 +90,8 @@ You can enable automatic linting by install [`pre-commit`](https://pre-commit.co
 ```shell
 pre-commit install
 ```
+
+You can also run the linters with `pre-commit run -a`.
 
 ## Generating the API docs
 
