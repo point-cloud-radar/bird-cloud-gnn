@@ -124,8 +124,8 @@ class RadarDataset(DGLDataset):
         self.labels = torch.FloatTensor(self.labels)
 
     def save(self):
-        graph_path = self.data_folder / f"dataset_storage_{self.name}_{self.hash}.bin"
-        info_path = self.data_folder / f"dataset_storage_{self.name}_{self.hash}.pkl"
+        graph_path = os.path.join(self.data_folder, f"dataset_storage_{self.name}_{self.hash}.bin")
+        info_path = os.path.join(self.data_folder, f"dataset_storage_{self.name}_{self.hash}.pkl")
         save_graphs(str(graph_path), self.graphs, {"labels": self.labels})
         save_info(
             str(info_path),
@@ -139,8 +139,8 @@ class RadarDataset(DGLDataset):
         )
 
     def load(self):
-        graph_path = self.data_folder / f"dataset_storage_{self.name}_{self.hash}.bin"
-        info_path = self.data_folder / f"dataset_storage_{self.name}_{self.hash}.pkl"
+        graph_path = os.path.join(self.data_folder, f"dataset_storage_{self.name}_{self.hash}.bin")
+        info_path = os.path.join(self.data_folder, f"dataset_storage_{self.name}_{self.hash}.pkl")
         graphs, label_dict = load_graphs(str(graph_path))
         info = load_info(str(info_path))
 
@@ -154,8 +154,8 @@ class RadarDataset(DGLDataset):
         self.min_neighbours = info["min_neighbours"]
 
     def has_cache(self):
-        graph_path = self.data_folder / f"dataset_storage_{self.name}_{self.hash}.bin"
-        info_path = self.data_folder / f"dataset_storage_{self.name}_{self.hash}.pkl"
+        graph_path = os.path.join(self.data_folder, f"dataset_storage_{self.name}_{self.hash}.bin")
+        info_path = os.path.join(self.data_folder, f"dataset_storage_{self.name}_{self.hash}.pkl")
         if os.path.exists(graph_path) and os.path.exists(info_path):
             return True
         return False
