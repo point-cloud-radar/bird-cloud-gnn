@@ -7,7 +7,7 @@ import pytest
 
 
 @pytest.fixture()
-def setup_dataset():
+def dataset_fixture(feat_fixture):
     """Setup radar dataset"""
     with TemporaryDirectory() as tmp:
         tmp_path = Path(tmp)
@@ -15,22 +15,10 @@ def setup_dataset():
         for i in range(0, 5):
             generate_data(tmp_path / f"data{i:03}.csv", 2 ** 6)
 
-        features = [
-            "range",
-            "azimuth",
-            "elevation",
-            "x",
-            "y",
-            "z",
-            "feat1",
-            "feat2",
-            "feat3",
-        ]
-
-        target = "class"
         max_distance = 30_000
         min_neighbours = 20
-
+        features = feat_fixture['features']
+        target = feat_fixture['target']
         dataset = RadarDataset(
             tmp_path,
             features,
@@ -39,3 +27,21 @@ def setup_dataset():
             min_neighbours=min_neighbours,
         )
         return dataset
+
+
+@pytest.fixture()
+def feat_fixture():
+    """Features and target"""
+    feat = {"features": [
+        "range",
+        "azimuth",
+        "elevation",
+        "x",
+        "y",
+        "z",
+        "feat1",
+        "feat2",
+        "feat3",
+    ], "target": "class"}
+
+    return feat
