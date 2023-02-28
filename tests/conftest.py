@@ -1,9 +1,8 @@
 from pathlib import Path
 from tempfile import TemporaryDirectory
-
+import pytest
 from bird_cloud_gnn.fake import generate_data
 from bird_cloud_gnn.radar_dataset import RadarDataset
-import pytest
 
 
 @pytest.fixture()

@@ -3,8 +3,10 @@
 import os
 import dgl
 import torch.nn.functional as F
-from torch import nn
 from dgl.nn.pytorch.conv import GraphConv
+from torch import nn
+
+
 os.environ['DGLBACKEND'] = 'pytorch'
 
 

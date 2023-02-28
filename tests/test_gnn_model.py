@@ -3,7 +3,6 @@ import torch
 import torch.nn.functional as F
 from dgl.dataloading import GraphDataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
-
 from bird_cloud_gnn.gnn_model import GCN
 
 
