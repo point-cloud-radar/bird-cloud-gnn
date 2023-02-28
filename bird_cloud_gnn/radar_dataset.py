@@ -27,6 +27,7 @@ class RadarDataset(DGLDataset):
         target (str): Target column. 0, 1 or missing expected.
         max_distance (float): Maximum distance to look for neighbours.
         min_neighbours (int): If a point has less than this amount of neighbours, it is ignored.
+        max_edge_distance (float): Creates a edge between two nodes if their distance is less than this value.
     """
 
     # pylint: disable=too-many-arguments, too-many-locals
@@ -38,6 +39,7 @@ class RadarDataset(DGLDataset):
         name="Radar",
         max_distance=500.0,
         min_neighbours=100,
+        max_edge_distance=50.0,
     ):
         """Constructor
 
@@ -49,6 +51,8 @@ class RadarDataset(DGLDataset):
                 500.0.
             min_neighbours (int, optional): If a point has less than this amount of neighbours, it
                 is ignored. Defaults to 100.
+            max_edge_distance (float, optional): Creates a edge between two nodes if their distance
+                is less than this value. Default to 50.0.
 
         Raises:
             ValueError: If `data_folder` is not a valid folder.
@@ -61,6 +65,7 @@ class RadarDataset(DGLDataset):
         self.target = target
         self.max_distance = max_distance
         self.min_neighbours = min_neighbours
+        self.max_edge_distance = max_edge_distance
         self.graphs = []
         self.labels = []
         super().__init__(
@@ -72,6 +77,7 @@ class RadarDataset(DGLDataset):
                 target,
                 max_distance,
                 min_neighbours,
+                max_edge_distance,
             ),
         )
 
@@ -107,7 +113,7 @@ class RadarDataset(DGLDataset):
                 _, indexes = tree.query(data.loc[point, xyz], self.min_neighbours)
                 local_tree = KDTree(data.loc[indexes, xyz])
                 distances = local_tree.sparse_distance_matrix(
-                    local_tree, self.max_distance, output_type="coo_matrix"
+                    local_tree, self.max_edge_distance, output_type="coo_matrix"
                 )
                 graph = dgl.graph((distances.row, distances.col))
 
@@ -124,8 +130,12 @@ class RadarDataset(DGLDataset):
         self.labels = torch.LongTensor(self.labels)
 
     def save(self):
-        graph_path = os.path.join(self.data_folder, f"dataset_storage_{self.name}_{self.hash}.bin")
-        info_path = os.path.join(self.data_folder, f"dataset_storage_{self.name}_{self.hash}.pkl")
+        graph_path = os.path.join(
+            self.data_folder, f"dataset_storage_{self.name}_{self.hash}.bin"
+        )
+        info_path = os.path.join(
+            self.data_folder, f"dataset_storage_{self.name}_{self.hash}.pkl"
+        )
         save_graphs(str(graph_path), self.graphs, {"labels": self.labels})
         save_info(
             str(info_path),
@@ -139,8 +149,12 @@ class RadarDataset(DGLDataset):
         )
 
     def load(self):
-        graph_path = os.path.join(self.data_folder, f"dataset_storage_{self.name}_{self.hash}.bin")
-        info_path = os.path.join(self.data_folder, f"dataset_storage_{self.name}_{self.hash}.pkl")
+        graph_path = os.path.join(
+            self.data_folder, f"dataset_storage_{self.name}_{self.hash}.bin"
+        )
+        info_path = os.path.join(
+            self.data_folder, f"dataset_storage_{self.name}_{self.hash}.pkl"
+        )
         graphs, label_dict = load_graphs(str(graph_path))
         info = load_info(str(info_path))
 
@@ -154,8 +168,12 @@ class RadarDataset(DGLDataset):
         self.min_neighbours = info["min_neighbours"]
 
     def has_cache(self):
-        graph_path = os.path.join(self.data_folder, f"dataset_storage_{self.name}_{self.hash}.bin")
-        info_path = os.path.join(self.data_folder, f"dataset_storage_{self.name}_{self.hash}.pkl")
+        graph_path = os.path.join(
+            self.data_folder, f"dataset_storage_{self.name}_{self.hash}.bin"
+        )
+        info_path = os.path.join(
+            self.data_folder, f"dataset_storage_{self.name}_{self.hash}.pkl"
+        )
         if os.path.exists(graph_path) and os.path.exists(info_path):
             return True
         return False

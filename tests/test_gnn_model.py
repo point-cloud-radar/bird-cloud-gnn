@@ -44,7 +44,7 @@ def test_gnn_model(dataset_fixture):
     num_tests = 0
 
     for batched_graph, labels in test_dataloader:
-        pred = model(batched_graph, batched_graph.ndata['x'].float())
+        pred = model(batched_graph, batched_graph.ndata["x"].float())
         num_correct += (pred.argmax(1) == labels).sum().item()
         num_tests += len(labels)
         assert pred.dim() == model.num_classes
