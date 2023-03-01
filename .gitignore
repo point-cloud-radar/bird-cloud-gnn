@@ -31,3 +31,4 @@ venv
 venv3
 
 data
+.pylintrc
