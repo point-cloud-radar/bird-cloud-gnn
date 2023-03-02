@@ -58,3 +58,12 @@ def test_radar_dataset(tmp_path):
     with pytest.raises(ValueError) as excinfo:
         RadarDataset(tmp_path, features, target, min_neighbours=10**8)
     assert "No graphs" in str(excinfo.value)
+
+    # Test with a explicit string as argument for folder.
+    dataset = RadarDataset(
+        str(tmp_path),
+        features,
+        target,
+        max_distance=max_distance,
+        min_neighbours=min_neighbours,
+    )
