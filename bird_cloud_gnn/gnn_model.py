@@ -7,7 +7,7 @@ from dgl.nn.pytorch.conv import GraphConv
 from torch import nn
 
 
-os.environ['DGLBACKEND'] = 'pytorch'
+os.environ["DGLBACKEND"] = "pytorch"
 
 
 class GCN(nn.Module):
@@ -16,6 +16,7 @@ class GCN(nn.Module):
     A two-layer GCN is constructed from input dimension, hidden dimensions and number of classes.
     Each layer computes new node representations by aggregating neighbor information.
     """
+
     def __init__(self, in_feats: int, h_feats: int, num_classes: int):
         """
         The __init__ function is the constructor for a class. It is called when an object of that class is instantiated.
@@ -53,5 +54,5 @@ class GCN(nn.Module):
         h = self.conv1(g, in_feat)
         h = F.relu(h)
         h = self.conv2(g, h)
-        g.ndata['h'] = h
-        return dgl.mean_nodes(g, 'h')
+        g.ndata["h"] = h
+        return dgl.mean_nodes(g, "h")
