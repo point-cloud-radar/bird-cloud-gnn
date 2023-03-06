@@ -30,5 +30,6 @@ pydocstyle:
 
 pylint:
     disable: [
-        too-many-locals
+        too-many-locals,
+        django-not-configured,
     ]
