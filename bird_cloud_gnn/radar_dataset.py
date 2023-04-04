@@ -87,7 +87,8 @@ class RadarDataset(DGLDataset):
         self.graphs = []
         self.labels = []
         for data_file in os.listdir(self.data_folder):
-            if os.path.splitext(data_file)[1] != ".csv":
+            split_on_dots = data_file.split(".")
+            if split_on_dots[-1] != "csv" and ".".join(split_on_dots[-2:]) != "csv.gz":
                 continue
             data = pd.read_csv(os.path.join(self.data_folder, data_file))
             data = data.drop(

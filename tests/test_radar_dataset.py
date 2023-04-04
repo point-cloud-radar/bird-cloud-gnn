@@ -1,5 +1,8 @@
 """Test RadarDataset"""
 
+import gzip
+import os
+import shutil
 import pytest
 from bird_cloud_gnn.fake import generate_data
 from bird_cloud_gnn.radar_dataset import RadarDataset
@@ -14,6 +17,11 @@ def test_radar_dataset(tmp_path):
 
     for i in range(0, 5):
         generate_data(tmp_path / f"data{i:03}.csv", 2**6)
+
+    with open(tmp_path / "data000.csv", "rb") as f_csv:
+        with gzip.open(tmp_path / "data000.csv.gz", "wb") as f_zip:
+            shutil.copyfileobj(f_csv, f_zip)
+    os.remove(tmp_path / "data000.csv")
 
     features = [
         "range",
