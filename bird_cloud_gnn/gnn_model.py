@@ -81,6 +81,6 @@ class GCN(nn.Module):
         return dgl.mean_nodes(g, "h")
 
 
-# testing
-if __name__ == "__main__":
-    model = GCN(in_feats=10, h_feats=16, num_classes=2)
+# # testing
+# if __name__ == "__main__":
+#     model = GCN(in_feats=10, h_feats=16, num_classes=2)
