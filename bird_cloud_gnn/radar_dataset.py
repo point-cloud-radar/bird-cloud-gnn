@@ -99,19 +99,22 @@ class RadarDataset(DGLDataset):
                     )
                 ].index
             ).reset_index(drop=True)
-            data_notna = data.drop(data[data[self.target].isna()].index).reset_index(
-                drop=True
-            )
+            na_index = data[data[self.target].isna()].index
+            data_notna = data.drop(na_index)
+            notna_index = data_notna.index
+            data_notna.reset_index(drop=True, inplace=True)
             tree = KDTree(data.loc[:, xyz])
             tree_notna = KDTree(data_notna.loc[:, xyz])
             distance_matrix = tree_notna.sparse_distance_matrix(tree, self.max_distance)
-            number_neighbours = np.array(np.sum(distance_matrix > 0, axis=1)).reshape(
-                -1
+            number_neighbours = (
+                np.array(np.sum(distance_matrix > 0, axis=1)).reshape(-1) + 1
             )
             points_of_interest = np.where(number_neighbours >= self.min_neighbours)[0]
 
             for point in points_of_interest:
-                _, indexes = tree.query(data.loc[point, xyz], self.min_neighbours)
+                _, indexes = tree.query(
+                    data.loc[notna_index[point], xyz], self.min_neighbours
+                )
                 local_tree = KDTree(data.loc[indexes, xyz])
                 distances = local_tree.sparse_distance_matrix(
                     local_tree, self.max_edge_distance, output_type="coo_matrix"
