@@ -14,7 +14,10 @@ os.environ["DGLBACKEND"] = "pytorch"
 # for now hardcoded
 MODULE_NAME = "gnn_model"
 # module_name = os.path.splitext(os.path.basename(__name__))[0]
-log_filename = os.path.join("../logs/", f"{MODULE_NAME}.log")
+logs_dir = "../logs/"
+if not os.path.exists(logs_dir):
+    os.makedirs(logs_dir)
+log_filename = os.path.join(logs_dir, f"{MODULE_NAME}.log")
 
 
 class GCN(nn.Module):
@@ -78,6 +81,6 @@ class GCN(nn.Module):
         return dgl.mean_nodes(g, "h")
 
 
-# # testing
-# if __name__ == "__main__":
-#     model = GCN(in_feats=10, h_feats=16, num_classes=2)
+# testing
+if __name__ == "__main__":
+    model = GCN(in_feats=10, h_feats=16, num_classes=2)
