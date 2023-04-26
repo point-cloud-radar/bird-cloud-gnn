@@ -1,5 +1,5 @@
 """Module for creating GCN class"""
-
+import logging
 import os
 import dgl
 import torch.nn.functional as F
@@ -9,8 +9,16 @@ from torch import nn
 
 os.environ["DGLBACKEND"] = "pytorch"
 
+# FIX retrieve module name instead of __main__
+# This might not be relevant if all logs are written to the same file?
+# for now hardcoded
+MODULE_NAME = "gnn_model"
+# module_name = os.path.splitext(os.path.basename(__name__))[0]
+log_filename = os.path.join("../logs/", f"{MODULE_NAME}.log")
+
 
 class GCN(nn.Module):
+
     """Graph Convolutional Network construction module
 
     A two-layer GCN is constructed from input dimension, hidden dimensions and number of classes.
@@ -39,6 +47,18 @@ class GCN(nn.Module):
         self.conv1 = GraphConv(in_feats, h_feats)
         self.conv2 = GraphConv(h_feats, num_classes)
 
+        # set up logging
+        self.logger = logging.getLogger(type(self).__name__)
+        self.logger.setLevel(logging.INFO)
+        handler = logging.FileHandler(log_filename, mode="w")
+        handler.setFormatter(
+            logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+        )
+        self.logger.addHandler(handler)
+        self.logger.info("Instantiating %s", type(self).__name__)
+        # maybe change this later if too much output
+        self.logger.info("%s", self.__repr__())
+
     def forward(self, g, in_feat):
         """
         The forward function computes the output of the model.
@@ -56,3 +76,8 @@ class GCN(nn.Module):
         h = self.conv2(g, h)
         g.ndata["h"] = h
         return dgl.mean_nodes(g, "h")
+
+
+# # testing
+# if __name__ == "__main__":
+#     model = GCN(in_feats=10, h_feats=16, num_classes=2)
