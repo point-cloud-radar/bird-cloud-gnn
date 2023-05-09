@@ -105,7 +105,6 @@ class RadarDataset(DGLDataset):
         ).reset_index(drop=True)
         na_index = data[data[self.target].isna()].index
         data_notna = data.drop(na_index)
-        notna_index = data_notna.index
         data_notna.reset_index(drop=True, inplace=True)
         tree = KDTree(data.loc[:, xyz])
         tree_notna = KDTree(data_notna.loc[:, xyz])
@@ -116,11 +115,14 @@ class RadarDataset(DGLDataset):
         number_neighbours = distance_matrix.getnnz(1)
         points_of_interest = np.where(number_neighbours >= self.min_neighbours)[0]
 
-        for point in points_of_interest:
-            _, indexes = tree.query(
-                data.loc[notna_index[point], xyz], self.min_neighbours
-            )
-            local_tree = KDTree(data.loc[indexes, xyz])
+        _, poi_indexes = tree.query(
+            data_notna.loc[points_of_interest, xyz], self.min_neighbours
+        )
+        self.labels = np.concatenate(
+            (self.labels, data_notna[self.target].values[points_of_interest])
+        )
+        for _, indexes in enumerate(poi_indexes):
+            local_tree = KDTree(data.loc[indexes, xyz])  # slow
             distances = local_tree.sparse_distance_matrix(
                 local_tree, self.max_edge_distance, output_type="coo_matrix"
             )
@@ -132,13 +134,12 @@ class RadarDataset(DGLDataset):
             graph.ndata["x"] = torch.tensor(local_data.values)
             graph.edata["a"] = torch.tensor(distances.data)
             self.graphs.append(graph)
-            self.labels.append(data_notna.loc[point, self.target])
 
     def process(self):
         """Internal function for the DGLDataset. Process the folder to create the graphs."""
 
         self.graphs = []
-        self.labels = []
+        self.labels = np.array([])
         for data_file in os.listdir(self.data_folder):
             self._read_one_file(data_file)
 
