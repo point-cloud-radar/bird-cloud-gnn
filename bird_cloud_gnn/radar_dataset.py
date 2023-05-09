@@ -103,11 +103,24 @@ class RadarDataset(DGLDataset):
                 )
             ].index
         ).reset_index(drop=True)
+
+        data_xyz = data[xyz]
+        data_features = data[self.features]
+
         na_index = data[data[self.target].isna()].index
-        data_notna = data.drop(na_index)
-        data_notna.reset_index(drop=True, inplace=True)
-        tree = KDTree(data.loc[:, xyz])
-        tree_notna = KDTree(data_notna.loc[:, xyz])
+
+        data_xyz_notna = data_xyz.drop(na_index)
+        data_features_notna = data_features.drop(na_index)
+
+        data_target = data[self.target]
+        data_target_notna = data_target[data_xyz_notna.index]
+
+        data_xyz_notna.reset_index(drop=True, inplace=True)
+        data_features_notna.reset_index(drop=True, inplace=True)
+
+        tree = KDTree(data_xyz)
+        tree_notna = KDTree(data_xyz_notna)
+
         distance_matrix = tree_notna.sparse_distance_matrix(
             tree, self.max_distance, output_type="coo_matrix"
         )
@@ -116,21 +129,20 @@ class RadarDataset(DGLDataset):
         points_of_interest = np.where(number_neighbours >= self.min_neighbours)[0]
 
         _, poi_indexes = tree.query(
-            data_notna.loc[points_of_interest, xyz], self.min_neighbours
+            data_xyz_notna.loc[points_of_interest], self.min_neighbours
         )
         self.labels = np.concatenate(
-            (self.labels, data_notna[self.target].values[points_of_interest])
+            (self.labels, data_target_notna.values[points_of_interest])
         )
         for _, indexes in enumerate(poi_indexes):
-            local_tree = KDTree(data.loc[indexes, xyz])  # slow
+            local_tree = KDTree(data_xyz.iloc[indexes])  # slow
             distances = local_tree.sparse_distance_matrix(
                 local_tree, self.max_edge_distance, output_type="coo_matrix"
             )
             graph = dgl.graph((distances.row, distances.col))
 
             # TODO: Better fillna
-            local_data = data.loc[indexes, self.features].fillna(0)
-            assert not np.any(np.isnan(local_data))
+            local_data = data_features.iloc[indexes].fillna(0)
             graph.ndata["x"] = torch.tensor(local_data.values)
             graph.edata["a"] = torch.tensor(distances.data)
             self.graphs.append(graph)
