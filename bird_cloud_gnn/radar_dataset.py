@@ -58,7 +58,7 @@ class RadarDataset(DGLDataset):
             ValueError: If `data_folder` is not a valid folder.
         """
         if not os.path.isdir(data_folder):
-            raise ValueError(f"'${data_folder}' is not a folder")
+            raise ValueError(f"'{data_folder}' is not a folder")
         self._name = name
         self.data_folder = data_folder
         self.features = features
