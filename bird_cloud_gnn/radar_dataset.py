@@ -81,53 +81,59 @@ class RadarDataset(DGLDataset):
             ),
         )
 
+    def _read_one_file(self, data_file):
+        """Reads a file and creates the graphs and labels for it."""
+
+        xyz = ["x", "y", "z"]
+        split_on_dots = data_file.split(".")
+        if split_on_dots[-1] != "csv" and ".".join(split_on_dots[-2:]) != "csv.gz":
+            return
+        data = pd.read_csv(os.path.join(self.data_folder, data_file))
+        data = data.drop(
+            data[
+                np.logical_or(
+                    data.range > 100000,
+                    np.logical_or(data.z > 10000, data.range < 5000),
+                )
+            ].index
+        ).reset_index(drop=True)
+        na_index = data[data[self.target].isna()].index
+        data_notna = data.drop(na_index)
+        notna_index = data_notna.index
+        data_notna.reset_index(drop=True, inplace=True)
+        tree = KDTree(data.loc[:, xyz])
+        tree_notna = KDTree(data_notna.loc[:, xyz])
+        distance_matrix = tree_notna.sparse_distance_matrix(tree, self.max_distance)
+        number_neighbours = (
+            np.array(np.sum(distance_matrix > 0, axis=1)).reshape(-1) + 1
+        )
+        points_of_interest = np.where(number_neighbours >= self.min_neighbours)[0]
+
+        for point in points_of_interest:
+            _, indexes = tree.query(
+                data.loc[notna_index[point], xyz], self.min_neighbours
+            )
+            local_tree = KDTree(data.loc[indexes, xyz])
+            distances = local_tree.sparse_distance_matrix(
+                local_tree, self.max_edge_distance, output_type="coo_matrix"
+            )
+            graph = dgl.graph((distances.row, distances.col))
+
+            # TODO: Better fillna
+            local_data = data.loc[indexes, self.features].fillna(0)
+            assert not np.any(np.isnan(local_data))
+            graph.ndata["x"] = torch.tensor(local_data.values)
+            graph.edata["a"] = torch.tensor(distances.data)
+            self.graphs.append(graph)
+            self.labels.append(data_notna.loc[point, self.target])
+
     def process(self):
         """Internal function for the DGLDataset. Process the folder to create the graphs."""
-        xyz = ["x", "y", "z"]
+
         self.graphs = []
         self.labels = []
         for data_file in os.listdir(self.data_folder):
-            split_on_dots = data_file.split(".")
-            if split_on_dots[-1] != "csv" and ".".join(split_on_dots[-2:]) != "csv.gz":
-                continue
-            data = pd.read_csv(os.path.join(self.data_folder, data_file))
-            data = data.drop(
-                data[
-                    np.logical_or(
-                        data.range > 100000,
-                        np.logical_or(data.z > 10000, data.range < 5000),
-                    )
-                ].index
-            ).reset_index(drop=True)
-            na_index = data[data[self.target].isna()].index
-            data_notna = data.drop(na_index)
-            notna_index = data_notna.index
-            data_notna.reset_index(drop=True, inplace=True)
-            tree = KDTree(data.loc[:, xyz])
-            tree_notna = KDTree(data_notna.loc[:, xyz])
-            distance_matrix = tree_notna.sparse_distance_matrix(tree, self.max_distance)
-            number_neighbours = (
-                np.array(np.sum(distance_matrix > 0, axis=1)).reshape(-1) + 1
-            )
-            points_of_interest = np.where(number_neighbours >= self.min_neighbours)[0]
-
-            for point in points_of_interest:
-                _, indexes = tree.query(
-                    data.loc[notna_index[point], xyz], self.min_neighbours
-                )
-                local_tree = KDTree(data.loc[indexes, xyz])
-                distances = local_tree.sparse_distance_matrix(
-                    local_tree, self.max_edge_distance, output_type="coo_matrix"
-                )
-                graph = dgl.graph((distances.row, distances.col))
-
-                # TODO: Better fillna
-                local_data = data.loc[indexes, self.features].fillna(0)
-                assert not np.any(np.isnan(local_data))
-                graph.ndata["x"] = torch.tensor(local_data.values)
-                graph.edata["a"] = torch.tensor(distances.data)
-                self.graphs.append(graph)
-                self.labels.append(data_notna.loc[point, self.target])
+            self._read_one_file(data_file)
 
         if len(self.graphs) == 0:
             raise ValueError("No graphs selected under rules passed")
