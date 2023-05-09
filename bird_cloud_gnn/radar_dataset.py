@@ -86,9 +86,15 @@ class RadarDataset(DGLDataset):
 
         xyz = ["x", "y", "z"]
         split_on_dots = data_file.split(".")
-        if split_on_dots[-1] != "csv" and ".".join(split_on_dots[-2:]) != "csv.gz":
+        if (
+            split_on_dots[-1] not in ["csv", "parquet"]
+            and ".".join(split_on_dots[-2:]) != "csv.gz"
+        ):
             return
-        data = pd.read_csv(os.path.join(self.data_folder, data_file))
+        if split_on_dots[-1] == "parquet":
+            data = pd.read_parquet(os.path.join(self.data_folder, data_file))
+        else:
+            data = pd.read_csv(os.path.join(self.data_folder, data_file))
         data = data.drop(
             data[
                 np.logical_or(
