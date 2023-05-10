@@ -115,7 +115,7 @@ def test_radar_dataset(tmp_path):
         features,
         target,
         max_distance=max_distance,
-        min_neighbours=min_neighbours,
+        min_neighbours=min_neighbours / 2,
         max_edge_distance=max_edge_distance,
     )
     dataset_pandas = RadarDataset(
@@ -123,7 +123,7 @@ def test_radar_dataset(tmp_path):
         features,
         target,
         max_distance=max_distance,
-        min_neighbours=min_neighbours,
+        min_neighbours=min_neighbours / 2,
         max_edge_distance=max_edge_distance,
     )
     assert len(dataset) == len(dataset_pandas)
