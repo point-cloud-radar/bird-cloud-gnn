@@ -57,17 +57,17 @@ class RadarDataset(DGLDataset):
         Raises:
             ValueError: If `data_folder` is not a valid folder.
         """
-        
-        self.data_folder=None
-        self.input_data=None
+
+        self.data_folder = None
+        self.input_data = None
         if isinstance(data, pd.DataFrame):
-            self.input_data=data
+            self.input_data = data
         else:
             if os.path.isdir(data) | os.path.isfile(data):
                 self.data_folder = data
             else:
                 raise ValueError(f"'data' is not a folder, file or pandas.DataFrame")
-                
+
         self._name = name
         self.features = features
         self.target = target
@@ -179,7 +179,9 @@ class RadarDataset(DGLDataset):
 
         else:
             if not isinstance(self.input_data, pd.DataFrame):
-                raise ValueError("if `self.data_folder` is not set, `self.input_data` should be a pandas.DataFrame")
+                raise ValueError(
+                    "if `self.data_folder` is not set, `self.input_data` should be a pandas.DataFrame"
+                )
             self._process_data(self.input_data)
 
         if len(self.graphs) == 0:
@@ -187,7 +189,6 @@ class RadarDataset(DGLDataset):
         self.labels = torch.LongTensor(self.labels)
 
     def save(self):
-
         graph_path = os.path.join(
             self.cache_dir(), f"dataset_storage_{self.name}_{self.hash}.bin"
         )
@@ -207,7 +208,6 @@ class RadarDataset(DGLDataset):
         )
 
     def load(self):
-
         graph_path = os.path.join(
             self.cache_dir(), f"dataset_storage_{self.name}_{self.hash}.bin"
         )
@@ -225,14 +225,13 @@ class RadarDataset(DGLDataset):
         self.target = info["target"]
         self.max_distance = info["max_distance"]
         self.min_neighbours = info["min_neighbours"]
-    
+
     def cache_dir(self):
         if self.data_folder == None:
-            directory= self.save_dir
+            directory = self.save_dir
         else:
-            directory=os.path.dirname(self.data_folder)
-        return(directory)
-            
+            directory = os.path.dirname(self.data_folder)
+        return directory
 
     def has_cache(self):
         graph_path = os.path.join(
