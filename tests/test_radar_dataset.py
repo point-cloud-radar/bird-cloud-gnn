@@ -4,6 +4,7 @@ import gzip
 import os
 import shutil
 import numpy as np
+import pandas as pd
 import pytest
 from bird_cloud_gnn.fake import generate_data
 from bird_cloud_gnn.radar_dataset import RadarDataset
@@ -108,6 +109,24 @@ def test_radar_dataset(tmp_path):
     assert len(dataset) > 0
     for graph, label in dataset:
         assert graph.num_edges() == min_neighbours**2
+
+    dataset = RadarDataset(
+        os.path.join(tmp_path, "data001.csv"),
+        features,
+        target,
+        max_distance=max_distance,
+        min_neighbours=min_neighbours,
+        max_edge_distance=max_edge_distance,
+    )
+    dataset_pandas = RadarDataset(
+        pd.read_csv(os.path.join(tmp_path, "data001.csv")),
+        features,
+        target,
+        max_distance=max_distance,
+        min_neighbours=min_neighbours,
+        max_edge_distance=max_edge_distance,
+    )
+    assert len(dataset) == len(dataset_pandas)
 
 
 def test_manually_defined_file(tmp_path):
