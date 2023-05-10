@@ -33,7 +33,7 @@ class RadarDataset(DGLDataset):
     # pylint: disable=too-many-arguments, too-many-locals
     def __init__(
         self,
-        data_folder,
+        data,
         features,
         target,
         name="Radar",
@@ -44,7 +44,7 @@ class RadarDataset(DGLDataset):
         """Constructor
 
         Args:
-            data_folder (str): Folder with the CSV files.
+            data (str or pandas.DataFrame): Folder with the CSV/parquet files, the path to a CSV/parquet file or a pandas.DataFrame.
             features (array of str): List of features expected to be present in every CSV file.
             target (str): Target column. 0, 1 or missing expected.
             max_distance (float, optional): Maximum distance to look for neighbours. Defaults to
@@ -57,10 +57,18 @@ class RadarDataset(DGLDataset):
         Raises:
             ValueError: If `data_folder` is not a valid folder.
         """
-        if not os.path.isdir(data_folder):
-            raise ValueError(f"'{data_folder}' is not a folder")
+        
+        self.data_folder=None
+        self.input_data=None
+        if isinstance(data, pd.DataFrame):
+            self.input_data=data
+        else:
+            if os.path.isdir(data) | os.path.isfile(data):
+                self.data_folder = data
+            else:
+                raise ValueError(f"'data' is not a folder, file or pandas.DataFrame")
+                
         self._name = name
-        self.data_folder = data_folder
         self.features = features
         self.target = target
         self.max_distance = max_distance
@@ -72,7 +80,7 @@ class RadarDataset(DGLDataset):
             name=name,
             hash_key=(
                 name,
-                data_folder,
+                data,
                 features,
                 target,
                 max_distance,
@@ -81,20 +89,25 @@ class RadarDataset(DGLDataset):
             ),
         )
 
-    def _read_one_file(self, data_file):
+    def _read_one_file(self, data_path):
         """Reads a file and creates the graphs and labels for it."""
-
-        xyz = ["x", "y", "z"]
-        split_on_dots = data_file.split(".")
+        print(data_path)
+        split_on_dots = data_path.split(".")
         if (
             split_on_dots[-1] not in ["csv", "parquet"]
             and ".".join(split_on_dots[-2:]) != "csv.gz"
         ):
             return
         if split_on_dots[-1] == "parquet":
-            data = pd.read_parquet(os.path.join(self.data_folder, data_file))
+            data = pd.read_parquet(data_path)
         else:
-            data = pd.read_csv(os.path.join(self.data_folder, data_file))
+            print(f"Flie join {data_path}")
+            data = pd.read_csv(data_path)
+        self._process_data(data)
+
+    def _process_data(self, data):
+        xyz = ["x", "y", "z"]
+
         data = data.drop(
             data[
                 np.logical_or(
@@ -152,19 +165,34 @@ class RadarDataset(DGLDataset):
 
         self.graphs = []
         self.labels = np.array([])
-        for data_file in os.listdir(self.data_folder):
-            self._read_one_file(data_file)
+        if not self.data_folder == None:
+            print("adsf")
+            if os.path.isdir(self.data_folder):
+                for data_file in os.listdir(self.data_folder):
+                    self._read_one_file(os.path.join(self.data_folder, data_file))
+            else:
+                print("aaadsf")
+                if not os.path.isfile(self.data_folder):
+                    raise ValueError("`data_folder` is neither a file nor a directory")
+                self._read_one_file(self.data_folder)
+                print("aaeeadsf")
+
+        else:
+            if not isinstance(self.input_data, pd.DataFrame):
+                raise ValueError("if `self.data_folder` is not set, `self.input_data` should be a pandas.DataFrame")
+            self._process_data(self.input_data)
 
         if len(self.graphs) == 0:
             raise ValueError("No graphs selected under rules passed")
         self.labels = torch.LongTensor(self.labels)
 
     def save(self):
+
         graph_path = os.path.join(
-            self.data_folder, f"dataset_storage_{self.name}_{self.hash}.bin"
+            self.cache_dir(), f"dataset_storage_{self.name}_{self.hash}.bin"
         )
         info_path = os.path.join(
-            self.data_folder, f"dataset_storage_{self.name}_{self.hash}.pkl"
+            self.cache_dir(), f"dataset_storage_{self.name}_{self.hash}.pkl"
         )
         save_graphs(str(graph_path), self.graphs, {"labels": self.labels})
         save_info(
@@ -179,11 +207,12 @@ class RadarDataset(DGLDataset):
         )
 
     def load(self):
+
         graph_path = os.path.join(
-            self.data_folder, f"dataset_storage_{self.name}_{self.hash}.bin"
+            self.cache_dir(), f"dataset_storage_{self.name}_{self.hash}.bin"
         )
         info_path = os.path.join(
-            self.data_folder, f"dataset_storage_{self.name}_{self.hash}.pkl"
+            self.cache_dir(), f"dataset_storage_{self.name}_{self.hash}.pkl"
         )
         graphs, label_dict = load_graphs(str(graph_path))
         info = load_info(str(info_path))
@@ -196,13 +225,21 @@ class RadarDataset(DGLDataset):
         self.target = info["target"]
         self.max_distance = info["max_distance"]
         self.min_neighbours = info["min_neighbours"]
+    
+    def cache_dir(self):
+        if self.data_folder == None:
+            directory= self.save_dir
+        else:
+            directory=os.path.dirname(self.data_folder)
+        return(directory)
+            
 
     def has_cache(self):
         graph_path = os.path.join(
-            self.data_folder, f"dataset_storage_{self.name}_{self.hash}.bin"
+            self.cache_dir(), f"dataset_storage_{self.name}_{self.hash}.bin"
         )
         info_path = os.path.join(
-            self.data_folder, f"dataset_storage_{self.name}_{self.hash}.pkl"
+            self.cache_dir(), f"dataset_storage_{self.name}_{self.hash}.pkl"
         )
         if os.path.exists(graph_path) and os.path.exists(info_path):
             return True
