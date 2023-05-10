@@ -91,7 +91,6 @@ class RadarDataset(DGLDataset):
 
     def _read_one_file(self, data_path):
         """Reads a file and creates the graphs and labels for it."""
-        print(data_path)
         split_on_dots = data_path.split(".")
         if (
             split_on_dots[-1] not in ["csv", "parquet"]
@@ -101,7 +100,6 @@ class RadarDataset(DGLDataset):
         if split_on_dots[-1] == "parquet":
             data = pd.read_parquet(data_path)
         else:
-            print(f"Flie join {data_path}")
             data = pd.read_csv(data_path)
         self._process_data(data)
 
@@ -166,16 +164,13 @@ class RadarDataset(DGLDataset):
         self.graphs = []
         self.labels = np.array([])
         if not self.data_folder == None:
-            print("adsf")
             if os.path.isdir(self.data_folder):
                 for data_file in os.listdir(self.data_folder):
                     self._read_one_file(os.path.join(self.data_folder, data_file))
             else:
-                print("aaadsf")
                 if not os.path.isfile(self.data_folder):
                     raise ValueError("`data_folder` is neither a file nor a directory")
                 self._read_one_file(self.data_folder)
-                print("aaeeadsf")
 
         else:
             if not isinstance(self.input_data, pd.DataFrame):
