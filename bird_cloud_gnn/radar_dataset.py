@@ -66,7 +66,7 @@ class RadarDataset(DGLDataset):
             if os.path.isdir(data) | os.path.isfile(data):
                 self.data_folder = data
             else:
-                raise ValueError(f"'data' is not a folder, file or pandas.DataFrame")
+                raise ValueError("'data' is not a folder, file or pandas.DataFrame")
 
         self._name = name
         self.features = features
@@ -163,7 +163,7 @@ class RadarDataset(DGLDataset):
 
         self.graphs = []
         self.labels = np.array([])
-        if not self.data_folder == None:
+        if self.data_folder is not None:
             if os.path.isdir(self.data_folder):
                 for data_file in os.listdir(self.data_folder):
                     self._read_one_file(os.path.join(self.data_folder, data_file))
@@ -222,7 +222,7 @@ class RadarDataset(DGLDataset):
         self.min_neighbours = info["min_neighbours"]
 
     def cache_dir(self):
-        if self.data_folder == None:
+        if self.data_folder is None:
             directory = self.save_dir
         else:
             directory = os.path.dirname(self.data_folder)
