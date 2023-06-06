@@ -83,7 +83,7 @@ class RadarDataset(DGLDataset):
             name=name,
             hash_key=(
                 name,
-                data,
+                data_hash,
                 features,
                 target,
                 max_distance,
@@ -170,17 +170,15 @@ class RadarDataset(DGLDataset):
             if os.path.isdir(self.data_folder):
                 for data_file in os.listdir(self.data_folder):
                     self._read_one_file(os.path.join(self.data_folder, data_file))
-            else:
-                if not os.path.isfile(self.data_folder):
-                    raise ValueError("`data_folder` is neither a file nor a directory")
+            elif os.path.isfile(self.data_folder):
                 self._read_one_file(self.data_folder)
+            else:
+                raise ValueError("`data_folder` is neither a file nor a directory")
 
-        else:
-            if not isinstance(self.input_data, pd.DataFrame):
-                raise ValueError(
-                    "if `self.data_folder` is not set, `self.input_data` should be a pandas.DataFrame"
-                )
+        elif self.input_data is not None:
             self._process_data(self.input_data)
+        else:
+            raise ValueError("Missing input. Either self.data_folder or self.input_data needs to be defined.")
 
         if len(self.graphs) == 0:
             raise ValueError("No graphs selected under rules passed")
@@ -227,8 +225,12 @@ class RadarDataset(DGLDataset):
     def cache_dir(self):
         if self.data_folder is None:
             directory = self.save_dir
-        else:
+        elif os.path.isdir(self.data_folder):
+            directory = self.data_folder
+        elif os.path.isfile(self.data_folder):
             directory = os.path.dirname(self.data_folder)
+        else:
+            raise ValueError("Missing input. Either self.data_folder or self.input_data needs to be defined.")
         return directory
 
     def has_cache(self):
