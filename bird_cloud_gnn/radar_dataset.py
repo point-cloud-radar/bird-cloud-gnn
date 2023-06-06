@@ -67,7 +67,9 @@ class RadarDataset(DGLDataset):
             self.data_folder = data
             data_hash = data
         else:
-            raise ValueError("'data' argument must be a folder, file or pandas.DataFrame")
+            raise ValueError(
+                "'data' argument must be a folder, file or pandas.DataFrame"
+            )
 
         self._name = name
         self.features = features
