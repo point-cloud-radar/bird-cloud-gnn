@@ -62,11 +62,12 @@ class RadarDataset(DGLDataset):
         self.input_data = None
         if isinstance(data, pd.DataFrame):
             self.input_data = data
+            data_hash = pd.util.hash_pandas_object(data).sum()
+        elif isistance(data, str) and (os.path.isdir(data) or os.path.isfile(data)):
+            self.data_folder = data
+            data_hash = data
         else:
-            if os.path.isdir(data) | os.path.isfile(data):
-                self.data_folder = data
-            else:
-                raise ValueError("'data' is not a folder, file or pandas.DataFrame")
+            raise ValueError("'data' argument must be a folder, file or pandas.DataFrame")
 
         self._name = name
         self.features = features
