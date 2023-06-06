@@ -178,7 +178,9 @@ class RadarDataset(DGLDataset):
         elif self.input_data is not None:
             self._process_data(self.input_data)
         else:
-            raise ValueError("Missing input. Either self.data_folder or self.input_data needs to be defined.")
+            raise ValueError(
+                "Missing input. Either self.data_folder or self.input_data needs to be defined."
+            )
 
         if len(self.graphs) == 0:
             raise ValueError("No graphs selected under rules passed")
@@ -230,7 +232,9 @@ class RadarDataset(DGLDataset):
         elif os.path.isfile(self.data_folder):
             directory = os.path.dirname(self.data_folder)
         else:
-            raise ValueError("Missing input. Either self.data_folder or self.input_data needs to be defined.")
+            raise ValueError(
+                "Missing input. Either self.data_folder or self.input_data needs to be defined."
+            )
         return directory
 
     def has_cache(self):
