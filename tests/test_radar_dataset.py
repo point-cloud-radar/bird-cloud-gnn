@@ -11,7 +11,6 @@ from bird_cloud_gnn.fake import generate_data
 from bird_cloud_gnn.radar_dataset import RadarDataset
 
 
-
 def test_radar_dataset(tmp_path):
     """Basic tests for RadarDataset"""
 
