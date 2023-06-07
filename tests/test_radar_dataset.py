@@ -11,12 +11,13 @@ from bird_cloud_gnn.fake import generate_data
 from bird_cloud_gnn.radar_dataset import RadarDataset
 
 
+
 def test_radar_dataset(tmp_path):
     """Basic tests for RadarDataset"""
 
     with pytest.raises(ValueError) as excinfo:
         RadarDataset("nowhere", [], "")
-    assert "not a folder" in str(excinfo.value)
+    assert "argument must be a folder, file or pandas.DataFrame" in str(excinfo.value)
 
     for i in range(0, 5):
         generate_data(tmp_path / f"data{i:03}.csv", 2**6)
