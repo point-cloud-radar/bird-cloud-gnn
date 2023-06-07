@@ -197,7 +197,7 @@ class RadarDataset(DGLDataset):
         save_info(
             str(info_path),
             {
-                "data_folder": self.data_path,
+                "data_path": self.data_path,
                 "features": self.features,
                 "target": self.target,
                 "max_distance": self.max_distance,
@@ -218,7 +218,7 @@ class RadarDataset(DGLDataset):
         self.graphs = graphs
         self.labels = label_dict["labels"]
 
-        self.data_path = info["data_folder"]
+        self.data_path = info["data_path"]
         self.features = info["features"]
         self.target = info["target"]
         self.max_distance = info["max_distance"]
