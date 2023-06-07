@@ -58,13 +58,13 @@ class RadarDataset(DGLDataset):
             ValueError: If `data_folder` is not a valid folder.
         """
 
-        self.data_folder = None
+        self.data_path = None
         self.input_data = None
         if isinstance(data, pd.DataFrame):
             self.input_data = data
             data_hash = pd.util.hash_pandas_object(data).sum()
-        elif (os.path.isdir(data) or os.path.isfile(data)):
-            self.data_folder = data
+        elif os.path.isdir(data) or os.path.isfile(data):
+            self.data_path = data
             data_hash = data
         else:
             raise ValueError(
@@ -166,12 +166,12 @@ class RadarDataset(DGLDataset):
 
         self.graphs = []
         self.labels = np.array([])
-        if self.data_folder is not None:
-            if os.path.isdir(self.data_folder):
-                for data_file in os.listdir(self.data_folder):
-                    self._read_one_file(os.path.join(self.data_folder, data_file))
-            elif os.path.isfile(self.data_folder):
-                self._read_one_file(self.data_folder)
+        if self.data_path is not None:
+            if os.path.isdir(self.data_path):
+                for data_file in os.listdir(self.data_path):
+                    self._read_one_file(os.path.join(self.data_path, data_file))
+            elif os.path.isfile(self.data_path):
+                self._read_one_file(self.data_path)
             else:
                 raise ValueError("`data_folder` is neither a file nor a directory")
 
@@ -197,7 +197,7 @@ class RadarDataset(DGLDataset):
         save_info(
             str(info_path),
             {
-                "data_folder": self.data_folder,
+                "data_folder": self.data_path,
                 "features": self.features,
                 "target": self.target,
                 "max_distance": self.max_distance,
@@ -218,19 +218,19 @@ class RadarDataset(DGLDataset):
         self.graphs = graphs
         self.labels = label_dict["labels"]
 
-        self.data_folder = info["data_folder"]
+        self.data_path = info["data_folder"]
         self.features = info["features"]
         self.target = info["target"]
         self.max_distance = info["max_distance"]
         self.min_neighbours = info["min_neighbours"]
 
     def cache_dir(self):
-        if self.data_folder is None:
+        if self.data_path is None:
             directory = self.save_dir
-        elif os.path.isdir(self.data_folder):
-            directory = self.data_folder
-        elif os.path.isfile(self.data_folder):
-            directory = os.path.dirname(self.data_folder)
+        elif os.path.isdir(self.data_path):
+            directory = self.data_path
+        elif os.path.isfile(self.data_path):
+            directory = os.path.dirname(self.data_path)
         else:
             raise ValueError(
                 "Missing input. Either self.data_folder or self.input_data needs to be defined."
