@@ -63,7 +63,7 @@ class RadarDataset(DGLDataset):
         if isinstance(data, pd.DataFrame):
             self.input_data = data
             data_hash = pd.util.hash_pandas_object(data).sum()
-        elif (os.path.isdir(data) or os.path.isfile(data)):
+        elif os.path.isdir(data) or os.path.isfile(data):
             self.data_folder = data
             data_hash = data
         else:
