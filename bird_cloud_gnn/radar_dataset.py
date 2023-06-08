@@ -55,7 +55,7 @@ class RadarDataset(DGLDataset):
                 is less than this value. Default to 50.0.
 
         Raises:
-            ValueError: If `data_folder` is not a valid folder.
+            ValueError: If `data` is not a valid folder, file  or pandas.DataFrame
         """
 
         self.data_path = None
