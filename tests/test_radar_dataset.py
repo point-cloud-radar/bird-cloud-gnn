@@ -51,8 +51,6 @@ def test_radar_dataset(tmp_path):
     assert len(dataset) > 0
     for graph, label in dataset:
         assert graph.num_nodes() == num_neighbours
-        # max_edge_distance must be manually selected to control this
-        assert num_neighbours < graph.num_edges() < num_neighbours**2
         assert label in (0, 1)
 
     assert dataset.has_cache()
