@@ -4,7 +4,9 @@ import gzip
 import os
 import shutil
 import numpy as np
+import pandas as pd
 import pytest
+import torch
 from bird_cloud_gnn.fake import generate_data
 from bird_cloud_gnn.radar_dataset import RadarDataset
 
@@ -14,7 +16,7 @@ def test_radar_dataset(tmp_path):
 
     with pytest.raises(ValueError) as excinfo:
         RadarDataset("nowhere", [], "")
-    assert "not a folder" in str(excinfo.value)
+    assert "argument must be a folder, file or pandas.DataFrame" in str(excinfo.value)
 
     for i in range(0, 5):
         generate_data(tmp_path / f"data{i:03}.csv", 2**6)
@@ -108,6 +110,30 @@ def test_radar_dataset(tmp_path):
     assert len(dataset) > 0
     for graph, label in dataset:
         assert graph.num_edges() == min_neighbours**2
+
+    # Test if reading a file or a pandas.DataFrame end up with the same graph's read (both labels and graphs should correspond)
+    dataset = RadarDataset(
+        os.path.join(tmp_path, "data001.csv"),
+        features,
+        target,
+        max_distance=max_distance,
+        min_neighbours=min_neighbours / 2,
+        max_edge_distance=max_edge_distance,
+    )
+    dataset_pandas = RadarDataset(
+        pd.read_csv(os.path.join(tmp_path, "data001.csv")),
+        features,
+        target,
+        max_distance=max_distance,
+        min_neighbours=min_neighbours / 2,
+        max_edge_distance=max_edge_distance,
+    )
+    assert len(dataset) == len(dataset_pandas)
+    for i in range(0, len(dataset)):
+        assert torch.equal(
+            dataset.graphs[i].ndata["x"], dataset_pandas.graphs[i].ndata["x"]
+        )
+    assert torch.equal(dataset.labels, dataset_pandas.labels)
 
 
 def test_manually_defined_file(tmp_path):
