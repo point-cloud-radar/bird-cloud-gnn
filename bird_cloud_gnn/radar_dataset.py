@@ -173,13 +173,13 @@ class RadarDataset(DGLDataset):
             elif os.path.isfile(self.data_path):
                 self._read_one_file(self.data_path)
             else:
-                raise ValueError("`data_folder` is neither a file nor a directory")
+                raise ValueError("`data_path` is neither a file nor a directory")
 
         elif self.input_data is not None:
             self._process_data(self.input_data)
         else:
             raise ValueError(
-                "Missing input. Either self.data_folder or self.input_data needs to be defined."
+                "Missing input. Either self.data_path or self.input_data needs to be defined."
             )
 
         if len(self.graphs) == 0:
@@ -233,7 +233,7 @@ class RadarDataset(DGLDataset):
             directory = os.path.dirname(self.data_path)
         else:
             raise ValueError(
-                "Missing input. Either self.data_folder or self.input_data needs to be defined."
+                "Missing input. Either self.data_path or self.input_data needs to be defined."
             )
         return directory
 
