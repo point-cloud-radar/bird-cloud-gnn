@@ -38,23 +38,21 @@ def test_radar_dataset(tmp_path):
         "feat3",
     ]
     target = "class"
-    max_distance = 30_000
-    min_neighbours = 20
+    num_neighbours = 20
     max_edge_distance = 5_000
 
     dataset = RadarDataset(
         tmp_path,
         features,
         target,
-        max_distance=max_distance,
-        min_neighbours=min_neighbours,
+        num_neighbours=num_neighbours,
         max_edge_distance=max_edge_distance,
     )
     assert len(dataset) > 0
     for graph, label in dataset:
-        assert graph.num_nodes() == min_neighbours
+        assert graph.num_nodes() == num_neighbours
         # max_edge_distance must be manually selected to control this
-        assert min_neighbours < graph.num_edges() < min_neighbours**2
+        assert num_neighbours < graph.num_edges() < num_neighbours**2
         assert label in (0, 1)
 
     assert dataset.has_cache()
@@ -63,26 +61,16 @@ def test_radar_dataset(tmp_path):
         tmp_path,
         features,
         target,
-        max_distance=max_distance,
-        min_neighbours=min_neighbours,
+        num_neighbours=num_neighbours,
         max_edge_distance=max_edge_distance,
     )
-
-    # Tests that filtering to have zero graphs throws an error
-    with pytest.raises(ValueError) as excinfo:
-        RadarDataset(tmp_path, features, target, max_distance=0.0)
-    assert "No graphs" in str(excinfo.value)
-    with pytest.raises(ValueError) as excinfo:
-        RadarDataset(tmp_path, features, target, min_neighbours=10**8)
-    assert "No graphs" in str(excinfo.value)
 
     # Test with a explicit string as argument for folder.
     dataset = RadarDataset(
         str(tmp_path),
         features,
         target,
-        max_distance=max_distance,
-        min_neighbours=min_neighbours,
+        num_neighbours=num_neighbours,
     )
 
     # Tests that if the maximum edge distance is too small, then only self-loops are found
@@ -90,42 +78,38 @@ def test_radar_dataset(tmp_path):
         tmp_path,
         features,
         target,
-        max_distance=max_distance,
-        min_neighbours=min_neighbours,
+        num_neighbours=num_neighbours,
         max_edge_distance=0,
     )
     assert len(dataset) > 0
     for graph, label in dataset:
-        assert graph.num_edges() == min_neighbours
+        assert graph.num_edges() == num_neighbours
 
     # Tests that if the maximum edge distance is too big, then the graph is fully connected
     dataset = RadarDataset(
         tmp_path,
         features,
         target,
-        max_distance=max_distance,
-        min_neighbours=min_neighbours,
-        max_edge_distance=max_distance**2,
+        num_neighbours=num_neighbours,
+        max_edge_distance=np.inf,
     )
     assert len(dataset) > 0
     for graph, label in dataset:
-        assert graph.num_edges() == min_neighbours**2
+        assert graph.num_edges() == num_neighbours**2
 
     # Test if reading a file or a pandas.DataFrame end up with the same graph's read (both labels and graphs should correspond)
     dataset = RadarDataset(
         os.path.join(tmp_path, "data001.csv"),
         features,
         target,
-        max_distance=max_distance,
-        min_neighbours=min_neighbours / 2,
+        num_neighbours=num_neighbours / 2,
         max_edge_distance=max_edge_distance,
     )
     dataset_pandas = RadarDataset(
         pd.read_csv(os.path.join(tmp_path, "data001.csv")),
         features,
         target,
-        max_distance=max_distance,
-        min_neighbours=min_neighbours / 2,
+        num_neighbours=num_neighbours / 2,
         max_edge_distance=max_edge_distance,
     )
     assert len(dataset) == len(dataset_pandas)
@@ -148,93 +132,73 @@ def test_manually_defined_file(tmp_path):
     ) as f:
         f.write(
             """range,x,y,z,f1,target
-10000,0,0,0,1,
-10000,1,0,0,2,
-10000,0,1,0,3,
-10000,0,0,1,4,
+10000,1,1,1,1,
+10000,0,1,1,2,
+10000,1,0,1,3,
+10000,1,1,0,4,
 10000,5,5,5,5,0
 10000,6,5,5,6,1
 10000,5,6,5,7,1
 10000,5,5,6,8,1"""
         )
 
-    # Distance is small enough so there is only one graph
-    dataset = RadarDataset(
-        tmp_path,
-        ["x", "y", "z", "f1"],
-        "target",
-        max_distance=1.1,
-        min_neighbours=4,
-        max_edge_distance=1.0,
-    )
-    assert len(dataset) == 1
-    graph, label = dataset[0]
-    assert label == 0
-    F = np.array(graph.ndata["x"])
-    F = F[F[:, -1].argsort()]
-    assert np.all(
-        F
-        == np.array(
-            [
-                [5, 5, 5, 5],
-                [6, 5, 5, 6],
-                [5, 6, 5, 7],
-                [5, 5, 6, 8],
-            ]
+    # No constraints on max_poi
+    for num_neighbours, max_poi_per_label, labels in [
+        (4, 4, [0, 1, 1, 1]),
+        (4, 1, [0, 1]),
+        (4, 8, [0, 1, 1, 1]),
+        (2, 4, [0, 1, 1, 1]),
+        (2, 2, [0, 1, 1]),
+        (6, 4, [0, 1, 1, 1]),
+        (8, 4, [0, 1, 1, 1]),
+    ]:
+        dataset = RadarDataset(
+            tmp_path,
+            ["x", "y", "z", "f1"],
+            "target",
+            num_neighbours=num_neighbours,
+            max_edge_distance=1.0,
+            max_poi_per_label=max_poi_per_label,
         )
-    )
-    print(graph)
-    assert graph.num_edges() == 3 * 2 + 4
+        assert len(dataset) == len(labels)
+        assert [x[1] for x in dataset] == labels
+        for graph, _ in dataset:
+            assert graph.num_nodes() == num_neighbours
+            if num_neighbours == 4:
+                F = np.array(graph.ndata["x"])
+                F = F[F[:, -1].argsort()]
+                assert np.all(
+                    F
+                    == np.array(
+                        [
+                            [5, 5, 5, 5],
+                            [6, 5, 5, 6],
+                            [5, 6, 5, 7],
+                            [5, 5, 6, 8],
+                        ]
+                    )
+                )
+            if num_neighbours <= 4:
+                assert graph.num_edges() == (num_neighbours - 1) * 2 + num_neighbours
+            else:
+                N = num_neighbours - 4
+                assert graph.num_edges() == 3 * 2 + 4 + (N - 1) * 2 + N
 
-    # Increase edge radius to make it a complete graph
-    dataset = RadarDataset(
-        tmp_path,
-        ["x", "y", "z", "f1"],
-        "target",
-        max_distance=1.1,
-        min_neighbours=4,
-        max_edge_distance=2.0,
-    )
-    assert len(dataset) == 1
-    graph, label = dataset[0]
-    assert label == 0
-    F = np.array(graph.ndata["x"])
-    F = F[F[:, -1].argsort()]
-    assert np.all(
-        F
-        == np.array(
-            [
-                [5, 5, 5, 5],
-                [6, 5, 5, 6],
-                [5, 6, 5, 7],
-                [5, 5, 6, 8],
-            ]
+    # # Increase edge radius to make it a complete graph
+    for num_neighbours in range(2, 8):
+        dataset = RadarDataset(
+            tmp_path,
+            ["x", "y", "z", "f1"],
+            "target",
+            num_neighbours=num_neighbours,
+            max_edge_distance=100.0,
+            max_poi_per_label=10,
         )
-    )
-    print(graph)
-    assert graph.num_edges() == 4 * 4
-
-    # Increase distance so other points in cluster also become graphs
-    dataset = RadarDataset(
-        tmp_path,
-        ["x", "y", "z", "f1"],
-        "target",
-        max_distance=1.42,
-        min_neighbours=4,
-    )
-    assert len(dataset) == 4
-    labels = [d[1] for d in dataset]
-    assert np.all(sorted(np.array(labels)) == np.array([0, 1, 1, 1]))
-
-    # Increase distance but also min_neighbours, so only one graph with all points exist
-    dataset = RadarDataset(
-        tmp_path,
-        ["x", "y", "z", "f1"],
-        "target",
-        max_distance=5 * np.sqrt(3) + 0.01,
-        min_neighbours=8,
-    )
-    assert len(dataset) == 1
+        assert len(dataset) == len(labels)
+        assert [x[1] for x in dataset] == labels
+        for graph, _ in dataset:
+            assert graph.num_nodes() == num_neighbours
+            assert graph.num_edges() == num_neighbours**2
 
 
 def test_centering_points(tmp_path):
@@ -263,10 +227,8 @@ def test_centering_points(tmp_path):
         tmp_path,
         ["x", "centered_y", "f1"],
         "target",
-        max_distance=5 * np.sqrt(3) + 0.01,
-        min_neighbours=8,
+        num_neighbours=8,
     )
-    assert len(dataset) == 1
 
     graph, label = dataset[0]
     assert label == 0
@@ -291,7 +253,6 @@ def test_centering_points(tmp_path):
             tmp_path,
             ["x", "y", "z", "f2"],
             "target",
-            max_distance=5 * np.sqrt(3) + 0.01,
-            min_neighbours=8,
+            num_neighbours=8,
         )
     assert "['f2'] not in index" in str(excinfo.value)

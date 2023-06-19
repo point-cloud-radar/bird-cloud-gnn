@@ -25,21 +25,21 @@ class RadarDataset(DGLDataset):
         data_folder (str): Folder with the CSV files.
         features (array of str): List of features expected to be present at every CSV file.
         target (str): Target column. 0, 1 or missing expected.
-        max_distance (float): Maximum distance to look for neighbours.
-        min_neighbours (int): If a point has less than this amount of neighbours, it is ignored.
+        num_neighbours (int): If a point has less than this amount of neighbours, it is ignored.
         max_edge_distance (float): Creates a edge between two nodes if their distance is less than this value.
+        max_poi_per_label (int): Select at most this amount of POIs. If there are more POIs, they are chosen randomly.
     """
 
-    # pylint: disable=too-many-arguments, too-many-locals
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         data,
         features,
         target,
         name="Radar",
-        max_distance=500.0,
-        min_neighbours=100,
+        num_neighbours=100,
         max_edge_distance=50.0,
+        max_poi_per_label=200,
     ):
         """Constructor
 
@@ -48,15 +48,12 @@ class RadarDataset(DGLDataset):
             features (array of str): List of features expected to be present in every CSV file.
                 If "centered_x" and/or "centered_y" are included these are calculated on the fly.
             target (str): Target column. 0, 1 or missing expected.
-            max_distance (float, optional): Maximum distance to look for neighbours. Defaults to
-                500.0.
-            min_neighbours (int, optional): If a point has less than this amount of neighbours, it
-                is ignored. Defaults to 100.
+            num_neighbours (int, optional): Number of selected neighbours. Defaults to 100.
             max_edge_distance (float, optional): Creates a edge between two nodes if their distance
                 is less than this value. Default to 50.0.
 
         Raises:
-            ValueError: If `data` is not a valid folder, file  or pandas.DataFrame
+            ValueError: If `data` is not a valid folder, file or pandas.DataFrame
         """
 
         self.data_path = None
@@ -75,9 +72,9 @@ class RadarDataset(DGLDataset):
         self._name = name
         self.features = features
         self.target = target
-        self.max_distance = max_distance
-        self.min_neighbours = min_neighbours
+        self.num_neighbours = num_neighbours
         self.max_edge_distance = max_edge_distance
+        self.max_poi_per_label = max_poi_per_label
         self.graphs = []
         self.labels = []
         super().__init__(
@@ -87,9 +84,9 @@ class RadarDataset(DGLDataset):
                 data_hash,
                 features,
                 target,
-                max_distance,
-                min_neighbours,
+                num_neighbours,
                 max_edge_distance,
+                max_poi_per_label,
             ),
         )
 
@@ -129,32 +126,31 @@ class RadarDataset(DGLDataset):
 
         data_features = data[temp_features]
 
-        na_index = data[data[self.target].isna()].index
-
-        data_xyz_notna = data_xyz.drop(na_index)
-        data_features_notna = data_features.drop(na_index)
-
         data_target = data[self.target]
-        data_target_notna = data_target[data_xyz_notna.index]
-
-        data_xyz_notna.reset_index(drop=True, inplace=True)
-        data_features_notna.reset_index(drop=True, inplace=True)
-
         tree = KDTree(data_xyz)
-        tree_notna = KDTree(data_xyz_notna)
 
-        distance_matrix = tree_notna.sparse_distance_matrix(
-            tree, self.max_distance, output_type="coo_matrix"
+        def sample_or_all(input_array, k):
+            if len(input_array) <= k:
+                return input_array
+
+            rng = np.random.default_rng()
+            return rng.choice(input_array, k, replace=False)
+
+        points_of_interest = np.concatenate(
+            [
+                sample_or_all(
+                    data[data[self.target] == label].index.to_numpy(),
+                    self.max_poi_per_label,
+                )
+                for label in [0, 1]  # Current possible labels
+            ]
         )
-
-        number_neighbours = distance_matrix.getnnz(1)
-        points_of_interest = np.where(number_neighbours >= self.min_neighbours)[0]
 
         _, poi_indexes = tree.query(
-            data_xyz_notna.loc[points_of_interest], self.min_neighbours
+            data_xyz.loc[points_of_interest], self.num_neighbours
         )
         self.labels = np.concatenate(
-            (self.labels, data_target_notna.values[points_of_interest])
+            (self.labels, data_target.values[points_of_interest])
         )
         for _, indexes in enumerate(poi_indexes):
             local_xyz = data_xyz.iloc[indexes]
@@ -218,8 +214,8 @@ class RadarDataset(DGLDataset):
                 "data_path": self.data_path,
                 "features": self.features,
                 "target": self.target,
-                "max_distance": self.max_distance,
-                "min_neighbours": self.min_neighbours,
+                "num_neighbours": self.num_neighbours,
+                "max_poi_per_label": self.max_poi_per_label,
             },
         )
 
@@ -239,8 +235,8 @@ class RadarDataset(DGLDataset):
         self.data_path = info["data_path"]
         self.features = info["features"]
         self.target = info["target"]
-        self.max_distance = info["max_distance"]
-        self.min_neighbours = info["min_neighbours"]
+        self.num_neighbours = info["num_neighbours"]
+        self.max_poi_per_label = info["max_poi_per_label"]
 
     def cache_dir(self):
         if self.data_path is None:

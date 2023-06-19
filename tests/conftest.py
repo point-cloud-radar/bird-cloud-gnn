@@ -14,16 +14,15 @@ def dataset_fixture(feat_fixture):
         for i in range(0, 5):
             generate_data(tmp_path / f"data{i:03}.csv", 2**6)
 
-        max_distance = 30_000
-        min_neighbours = 20
+        num_neighbours = 20
         features = feat_fixture["features"]
         target = feat_fixture["target"]
         dataset = RadarDataset(
             tmp_path,
             features,
             target,
-            max_distance=max_distance,
-            min_neighbours=min_neighbours,
+            num_neighbours=num_neighbours,
+            max_poi_per_label=100,
         )
         return dataset
 
