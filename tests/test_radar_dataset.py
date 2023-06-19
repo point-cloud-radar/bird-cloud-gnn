@@ -56,7 +56,7 @@ def test_radar_dataset(tmp_path):
         # max_edge_distance must be manually selected to control this
         assert min_neighbours < graph.num_edges() < min_neighbours**2
         assert label in (0, 1)
-
+    assert np.array(dataset.labels).size == dataset.origin.size
     assert dataset.has_cache()
     # Call again to run .load
     dataset = RadarDataset(
