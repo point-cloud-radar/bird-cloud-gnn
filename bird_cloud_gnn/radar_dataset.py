@@ -46,6 +46,7 @@ class RadarDataset(DGLDataset):
         Args:
             data (str or pandas.DataFrame): Folder with the CSV/parquet files, the path to a CSV/parquet file or a pandas.DataFrame.
             features (array of str): List of features expected to be present in every CSV file.
+                If "centered_x" and/or "centered_y" are included these are calculated on the fly.
             target (str): Target column. 0, 1 or missing expected.
             max_distance (float, optional): Maximum distance to look for neighbours. Defaults to
                 500.0.
@@ -119,7 +120,14 @@ class RadarDataset(DGLDataset):
         ).reset_index(drop=True)
 
         data_xyz = data[xyz]
-        data_features = data[self.features]
+        # remove the special features so they can be generated later
+        temp_features = self.features.copy()
+        if "centered_x" in temp_features:
+            temp_features.remove("centered_x")
+        if "centered_y" in temp_features:
+            temp_features.remove("centered_y")
+
+        data_features = data[temp_features]
 
         na_index = data[data[self.target].isna()].index
 
@@ -149,7 +157,8 @@ class RadarDataset(DGLDataset):
             (self.labels, data_target_notna.values[points_of_interest])
         )
         for _, indexes in enumerate(poi_indexes):
-            local_tree = KDTree(data_xyz.iloc[indexes])  # slow
+            local_xyz = data_xyz.iloc[indexes]
+            local_tree = KDTree(local_xyz)  # slow
             distances = local_tree.sparse_distance_matrix(
                 local_tree, self.max_edge_distance, output_type="coo_matrix"
             )
@@ -157,6 +166,15 @@ class RadarDataset(DGLDataset):
 
             # TODO: Better fillna
             local_data = data_features.iloc[indexes].fillna(0)
+            # calculate special features on the fly for each graph
+            if "centered_x" in self.features:
+                local_data["centered_x"] = local_xyz[xyz[0]] - local_xyz[xyz[0]].iloc[0]
+            if "centered_y" in self.features:
+                local_data["centered_y"] = local_xyz[xyz[1]] - local_xyz[xyz[1]].iloc[0]
+
+            # ensure column order is the same as in self.features
+            local_data = local_data[self.features]
+
             graph.ndata["x"] = torch.tensor(local_data.values)
             graph.edata["a"] = torch.tensor(distances.data)
             self.graphs.append(graph)

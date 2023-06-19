@@ -235,3 +235,63 @@ def test_manually_defined_file(tmp_path):
         min_neighbours=8,
     )
     assert len(dataset) == 1
+
+
+def test_centering_points(tmp_path):
+    # The data 'two_clusters_one_nan_one_labeled' contains a cluster around 0,
+    # with all of the points unlabeled, and a cluster around (5,5,5), with
+    # all of the points labeled. The points are (5,5,5), (6,5,5), (5,6,5),
+    # and (5,5,6). The labels are 0 for (5,5,5) and 1 for the others.
+    # There is a single feature, f1, whose value is equal to index+1.
+
+    with open(
+        tmp_path / "two_clusters_one_nan_one_labeled.csv", "w", encoding="utf-8"
+    ) as f:
+        f.write(
+            """range,x,y,z,f1,target
+10000,1,1,1,1,
+10000,1,0,0,2,
+10000,0,1,0,3,
+10000,0,0,1,4,
+10000,5,5,5,5,0
+10000,6,5,5,6,1
+10000,5,6,5,7,1
+10000,5,5,6,8,1"""
+        )
+
+    dataset = RadarDataset(
+        tmp_path,
+        ["x", "centered_y", "f1"],
+        "target",
+        max_distance=5 * np.sqrt(3) + 0.01,
+        min_neighbours=8,
+    )
+    assert len(dataset) == 1
+
+    graph, label = dataset[0]
+    assert label == 0
+    F = np.array(graph.ndata["x"])
+    assert np.all(
+        F[F[:, 2].argsort()]
+        == np.array(
+            [
+                [1, -4, 1],
+                [1, -5, 2],
+                [0, -4, 3],
+                [0, -5, 4],
+                [5, 0, 5],
+                [6, 0, 6],
+                [5, 1, 7],
+                [5, 0, 8],
+            ]
+        )
+    )
+    with pytest.raises(KeyError) as excinfo:
+        RadarDataset(
+            tmp_path,
+            ["x", "y", "z", "f2"],
+            "target",
+            max_distance=5 * np.sqrt(3) + 0.01,
+            min_neighbours=8,
+        )
+    assert "['f2'] not in index" in str(excinfo.value)
