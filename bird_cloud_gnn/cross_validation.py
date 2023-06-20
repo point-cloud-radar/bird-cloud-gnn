@@ -51,7 +51,6 @@ def kfold_evaluate(
             drop_last=False,
         )
 
-        learning_rate = 0.01
         model = GCN(
             in_feats=len(dataset.features),
             h_feats=h_feats,
