@@ -76,7 +76,6 @@ class GCN(nn.Module):
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
-                assert pred.dim() == self.num_classes
 
     def evaluate(self, test_dataloader):
         """
