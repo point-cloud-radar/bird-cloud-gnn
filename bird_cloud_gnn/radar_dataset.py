@@ -85,9 +85,9 @@ class RadarDataset(DGLDataset):
                 data_hash,
                 features,
                 target,
-                num_neighbours,
                 max_edge_distance,
                 max_poi_per_label,
+                num_neighbours,
             ),
         )
 
@@ -219,9 +219,11 @@ class RadarDataset(DGLDataset):
             {
                 "data_path": self.data_path,
                 "features": self.features,
-                "target": self.target,
-                "num_neighbours": self.num_neighbours,
+                "max_edge_distance": self.max_edge_distance,
                 "max_poi_per_label": self.max_poi_per_label,
+                "num_neighbours": self.num_neighbours,
+                "origin": self.origin,
+                "target": self.target,
             },
         )
 
@@ -240,9 +242,11 @@ class RadarDataset(DGLDataset):
 
         self.data_path = info["data_path"]
         self.features = info["features"]
-        self.target = info["target"]
-        self.num_neighbours = info["num_neighbours"]
+        self.max_edge_distance = info["max_edge_distance"]
         self.max_poi_per_label = info["max_poi_per_label"]
+        self.num_neighbours = info["num_neighbours"]
+        self.origin = info["origin"]
+        self.target = info["target"]
 
     def cache_dir(self):
         if self.data_path is None:

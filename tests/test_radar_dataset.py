@@ -66,6 +66,7 @@ def test_radar_dataset(tmp_path):
         num_neighbours=num_neighbours,
         max_edge_distance=max_edge_distance,
     )
+    assert len(dataset.origin) == len(dataset)
 
     # Test with a explicit string as argument for folder.
     dataset = RadarDataset(
