@@ -77,6 +77,7 @@ class RadarDataset(DGLDataset):
         self.max_poi_per_label = max_poi_per_label
         self.graphs = []
         self.labels = []
+        self.origin = pd.Categorical([])
         super().__init__(
             name=name,
             hash_key=(
@@ -102,9 +103,9 @@ class RadarDataset(DGLDataset):
             data = pd.read_parquet(data_path)
         else:
             data = pd.read_csv(data_path)
-        self._process_data(data)
+        self._process_data(data, origin=data_path)
 
-    def _process_data(self, data):
+    def _process_data(self, data, origin=""):
         xyz = ["x", "y", "z"]
 
         data = data.drop(
@@ -174,6 +175,11 @@ class RadarDataset(DGLDataset):
             graph.ndata["x"] = torch.tensor(local_data.values)
             graph.edata["a"] = torch.tensor(distances.data)
             self.graphs.append(graph)
+        if origin == "":
+            origin = pd.util.hash_pandas_object(data).to_string()
+        self.origin = pd.api.types.union_categoricals(
+            [self.origin, pd.Categorical([origin]).repeat(poi_indexes.shape[0])]
+        )
 
     def process(self):
         """Internal function for the DGLDataset. Process the folder to create the graphs."""
@@ -182,7 +188,7 @@ class RadarDataset(DGLDataset):
         self.labels = np.array([])
         if self.data_path is not None:
             if os.path.isdir(self.data_path):
-                for data_file in os.listdir(self.data_path):
+                for data_file in sorted(os.listdir(self.data_path)):
                     self._read_one_file(os.path.join(self.data_path, data_file))
             elif os.path.isfile(self.data_path):
                 self._read_one_file(self.data_path)

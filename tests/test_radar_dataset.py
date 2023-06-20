@@ -3,6 +3,7 @@
 import gzip
 import os
 import shutil
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import pytest
@@ -52,6 +53,9 @@ def test_radar_dataset(tmp_path):
     for graph, label in dataset:
         assert graph.num_nodes() == num_neighbours
         assert label in (0, 1)
+    assert np.array(dataset.labels).size == dataset.origin.size
+    assert Path(dataset.origin[0]) == (tmp_path) / "data000.csv.gz"
+    assert Path(dataset.origin[dataset.origin.size - 1]) == (tmp_path) / "data004.csv"
 
     assert dataset.has_cache()
     # Call again to run .load
