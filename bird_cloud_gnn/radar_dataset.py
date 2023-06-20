@@ -192,7 +192,7 @@ class RadarDataset(DGLDataset):
         self.labels = np.array([])
         if self.data_path is not None:
             if os.path.isdir(self.data_path):
-                for data_file in os.listdir(self.data_path):
+                for data_file in sorted(os.listdir(self.data_path)):
                     self._read_one_file(os.path.join(self.data_path, data_file))
             elif os.path.isfile(self.data_path):
                 self._read_one_file(self.data_path)

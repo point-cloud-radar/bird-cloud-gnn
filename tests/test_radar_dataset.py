@@ -57,6 +57,9 @@ def test_radar_dataset(tmp_path):
         assert min_neighbours < graph.num_edges() < min_neighbours**2
         assert label in (0, 1)
     assert np.array(dataset.labels).size == dataset.origin.size
+    assert dataset.origin[0] == str(tmp_path) + "/data000.csv.gz"
+    assert dataset.origin[dataset.origin.size - 1] == str(tmp_path) + "/data004.csv"
+
     assert dataset.has_cache()
     # Call again to run .load
     dataset = RadarDataset(
