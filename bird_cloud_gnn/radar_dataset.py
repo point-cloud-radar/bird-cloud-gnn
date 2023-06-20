@@ -182,7 +182,7 @@ class RadarDataset(DGLDataset):
         if origin == "":
             origin = pd.util.hash_pandas_object(data).to_string()
         self.origin = pd.api.types.union_categoricals(
-            [self.origin, pd.Categorical([origin] * poi_indexes.shape[0])]
+            [self.origin, pd.Categorical([origin]).repeat(poi_indexes.shape[0])]
         )
 
     def process(self):
