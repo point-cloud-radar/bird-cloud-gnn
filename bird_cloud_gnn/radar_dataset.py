@@ -203,10 +203,12 @@ class RadarDataset(DGLDataset):
             )
 
         if len(self.graphs) == 0:
-            raise ValueError("No graphs selected under rules passed")
+            print("Warning: No graphs selected under rules passed")
         self.labels = torch.LongTensor(self.labels)
 
     def save(self):
+        if len(self.graphs) == 0:
+            return
         graph_path = os.path.join(
             self.cache_dir(), f"dataset_storage_{self.name}_{self.hash}.bin"
         )

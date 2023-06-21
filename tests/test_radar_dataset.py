@@ -259,3 +259,22 @@ def test_centering_points(tmp_path):
             num_neighbours=8,
         )
     assert "['f2'] not in index" in str(excinfo.value)
+
+
+def test_no_graphs(tmp_path):
+    with open(tmp_path / "no_graphs.csv", "w", encoding="utf-8") as f:
+        f.write(
+            """range,x,y,z,f1,target
+10000,1,1,1,1,
+10000,0,1,1,2,
+10000,1,0,1,3,
+10000,1,1,0,4,"""
+        )
+
+    dataset = RadarDataset(
+        tmp_path,
+        ["x", "centered_y", "f1"],
+        "target",
+        num_neighbours=8,
+    )
+    assert len(dataset) == 0
