@@ -1,6 +1,5 @@
 """Tests for gnn_model module"""
 import torch
-import torch.nn.functional as F
 from dgl.dataloading import GraphDataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
 from bird_cloud_gnn.gnn_model import GCN
@@ -29,25 +28,8 @@ def test_gnn_model(dataset_fixture):
     )
 
     model = GCN(len(dataset_fixture.features), 16, 2)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
-
-    for _ in range(20):
-        for batched_graph, labels in train_dataloader:
-            pred = model(batched_graph, batched_graph.ndata["x"].float())
-            loss = F.cross_entropy(pred, labels)
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-            assert pred.dim() == model.num_classes
-
-    num_correct = 0
-    num_tests = 0
-
-    for batched_graph, labels in test_dataloader:
-        pred = model(batched_graph, batched_graph.ndata["x"].float())
-        num_correct += (pred.argmax(1) == labels).sum().item()
-        num_tests += len(labels)
-        assert pred.dim() == model.num_classes
+    model.fit(train_dataloader)
+    model.evaluate(test_dataloader)
 
 
 class TestBasicBehaviour:
