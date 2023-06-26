@@ -31,6 +31,11 @@ def test_gnn_model(dataset_fixture):
     model.fit(train_dataloader)
     model.evaluate(test_dataloader)
 
+    assert len(model.infer(dataset_fixture, batch_size=30)) == len(dataset_fixture)
+    assert (
+        (model.infer(dataset_fixture) == 1) | (model.infer(dataset_fixture) == 0)
+    ).all()
+
 
 class TestBasicBehaviour:
     """Set of tests for field access, inequality of classes and expected exceptions"""

@@ -120,7 +120,7 @@ class GCN(nn.Module):
             drop_last=False,
         )
         labels = np.array([])
-        for batched_graph, labels in dataloader:
+        for batched_graph, _ in dataloader:
             pred = (
                 self(batched_graph, batched_graph.ndata["x"].float()).argmax(1).numpy()
             )
