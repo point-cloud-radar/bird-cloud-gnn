@@ -2,7 +2,9 @@
 
 import os
 import dgl
+import numpy as np
 import torch.nn.functional as F
+from dgl.dataloading import GraphDataLoader
 from dgl.nn.pytorch.conv import GraphConv
 from torch import nn
 from torch import optim
@@ -99,3 +101,28 @@ class GCN(nn.Module):
 
         accuracy = num_correct / num_tests
         return accuracy
+
+    def infer(self, dataset, batch_size=1024):
+        """
+        Using the model do inference on a dataset.
+
+        Args:
+            dataset: A `RadarDataSet` where for each graph inference needs to be done.
+
+        Returns:
+            labels: A numpy array with infered labels for each graph
+        """
+        self.eval()
+        dataloader = GraphDataLoader(
+            shuffle=False,
+            dataset=dataset,
+            batch_size=batch_size,
+            drop_last=False,
+        )
+        labels = np.array([])
+        for batched_graph, _ in dataloader:
+            pred = (
+                self(batched_graph, batched_graph.ndata["x"].float()).argmax(1).numpy()
+            )
+            labels = np.concatenate([labels, pred])
+        return labels
