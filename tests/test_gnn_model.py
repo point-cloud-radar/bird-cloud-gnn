@@ -2,6 +2,9 @@
 import torch
 from dgl.dataloading import GraphDataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
+from bird_cloud_gnn.callback import CombinedCallback
+from bird_cloud_gnn.callback import EarlyStopperCallback
+from bird_cloud_gnn.callback import TensorboardCallback
 from bird_cloud_gnn.gnn_model import GCN
 
 
@@ -30,6 +33,14 @@ def test_gnn_model(dataset_fixture):
     model = GCN(len(dataset_fixture.features), 16, 2)
     model.fit(train_dataloader)
     model.evaluate(test_dataloader)
+
+    callback = callback = CombinedCallback(
+        [
+            TensorboardCallback(),
+            EarlyStopperCallback(patience=3),
+        ]
+    )
+    model.fit_and_evaluate(train_dataloader, test_dataloader, callback)
 
     assert len(model.infer(dataset_fixture, batch_size=30)) == len(dataset_fixture)
     assert (
