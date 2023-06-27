@@ -11,6 +11,7 @@ from dgl.data.utils import load_info
 from dgl.data.utils import save_graphs
 from dgl.data.utils import save_info
 from scipy.spatial import KDTree
+from tqdm import tqdm
 
 
 class RadarDataset(DGLDataset):
@@ -188,8 +189,13 @@ class RadarDataset(DGLDataset):
         self.labels = np.array([])
         if self.data_path is not None:
             if os.path.isdir(self.data_path):
-                for data_file in sorted(os.listdir(self.data_path)):
+                print("Reading data from folder")
+                data_files = sorted(os.listdir(self.data_path))
+                progress_bar = tqdm(total=len(data_files))
+                for data_file in data_files:
                     self._read_one_file(os.path.join(self.data_path, data_file))
+                    progress_bar.set_postfix({"Data file": data_file})
+                    progress_bar.update(1)
             elif os.path.isfile(self.data_path):
                 self._read_one_file(self.data_path)
             else:
