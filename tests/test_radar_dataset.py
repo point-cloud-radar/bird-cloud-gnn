@@ -278,3 +278,48 @@ def test_no_graphs(tmp_path):
         num_neighbours=8,
     )
     assert len(dataset) == 0
+
+
+def test_not_enough_points_in_neighbourhood(tmp_path):
+    with open(
+        tmp_path / "two_clusters_one_nan_one_labeled.csv", "w", encoding="utf-8"
+    ) as f:
+        f.write(
+            """range,x,y,z,f1,target
+10000,1,1,1,1,
+10000,0,1,1,2,
+10000,1,0,1,3,
+10000,1,1,0,4,
+10000,5,5,5,5,0
+10000,6,5,5,6,1
+10000,5,6,5,7,1
+10000,5,5,6,8,1"""
+        )
+
+    dataset = RadarDataset(
+        tmp_path,
+        ["x", "y", "z", "f1"],
+        "target",
+        num_neighbours=8,
+        max_edge_distance=2.0,
+        max_poi_per_label=10,
+    )
+    assert len(dataset) == 4
+    dataset = RadarDataset(
+        tmp_path,
+        ["x", "y", "z", "f1"],
+        "target",
+        num_neighbours=9,
+        max_edge_distance=2.0,
+        max_poi_per_label=10,
+    )
+    assert len(dataset) == 0
+    dataset = RadarDataset(
+        pd.read_csv(os.path.join(tmp_path, "two_clusters_one_nan_one_labeled.csv")),
+        ["x", "y", "z", "f1"],
+        "target",
+        num_neighbours=9,
+        max_edge_distance=2.0,
+        max_poi_per_label=10,
+    )
+    assert len(dataset) == 0
