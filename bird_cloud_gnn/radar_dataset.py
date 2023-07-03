@@ -117,6 +117,11 @@ class RadarDataset(DGLDataset):
                 )
             ].index
         ).reset_index(drop=True)
+        if len(data) < self.num_neighbours:
+            print(
+                f"Warning: There are not enough points in {origin} to form neighbourhood of size {self.num_neighbours}"
+            )
+            return
 
         data_xyz = data[xyz]
         # remove the special features so they can be generated later
