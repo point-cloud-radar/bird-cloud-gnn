@@ -39,19 +39,19 @@ def test_radar_dataset(tmp_path):
         "feat3",
     ]
     target = "class"
-    num_neighbours = 20
+    num_nodes = 20
     max_edge_distance = 5_000
 
     dataset = RadarDataset(
         tmp_path,
         features,
         target,
-        num_neighbours=num_neighbours,
+        num_nodes=num_nodes,
         max_edge_distance=max_edge_distance,
     )
     assert len(dataset) > 0
     for graph, label in dataset:
-        assert graph.num_nodes() == num_neighbours
+        assert graph.num_nodes() == num_nodes
         assert label in (0, 1)
     assert np.array(dataset.labels).size == dataset.origin.size
     assert Path(dataset.origin[0]) == (tmp_path) / "data000.csv.gz"
@@ -63,7 +63,7 @@ def test_radar_dataset(tmp_path):
         tmp_path,
         features,
         target,
-        num_neighbours=num_neighbours,
+        num_nodes=num_nodes,
         max_edge_distance=max_edge_distance,
     )
     assert len(dataset.origin) == len(dataset)
@@ -73,7 +73,7 @@ def test_radar_dataset(tmp_path):
         str(tmp_path),
         features,
         target,
-        num_neighbours=num_neighbours,
+        num_nodes=num_nodes,
     )
 
     # Tests that if the maximum edge distance is too small, then only self-loops are found
@@ -81,38 +81,38 @@ def test_radar_dataset(tmp_path):
         tmp_path,
         features,
         target,
-        num_neighbours=num_neighbours,
+        num_nodes=num_nodes,
         max_edge_distance=0,
     )
     assert len(dataset) > 0
     for graph, label in dataset:
-        assert graph.num_edges() == num_neighbours
+        assert graph.num_edges() == num_nodes
 
     # Tests that if the maximum edge distance is too big, then the graph is fully connected
     dataset = RadarDataset(
         tmp_path,
         features,
         target,
-        num_neighbours=num_neighbours,
+        num_nodes=num_nodes,
         max_edge_distance=np.inf,
     )
     assert len(dataset) > 0
     for graph, label in dataset:
-        assert graph.num_edges() == num_neighbours**2
+        assert graph.num_edges() == num_nodes**2
 
     # Test if reading a file or a pandas.DataFrame end up with the same graph's read (both labels and graphs should correspond)
     dataset = RadarDataset(
         os.path.join(tmp_path, "data001.csv"),
         features,
         target,
-        num_neighbours=num_neighbours / 2,
+        num_nodes=num_nodes / 2,
         max_edge_distance=max_edge_distance,
     )
     dataset_pandas = RadarDataset(
         pd.read_csv(os.path.join(tmp_path, "data001.csv")),
         features,
         target,
-        num_neighbours=num_neighbours / 2,
+        num_nodes=num_nodes / 2,
         max_edge_distance=max_edge_distance,
     )
     assert len(dataset) == len(dataset_pandas)
@@ -146,7 +146,7 @@ def test_manually_defined_file(tmp_path):
         )
 
     # No constraints on max_poi
-    for num_neighbours, max_poi_per_label, labels in [
+    for num_nodes, max_poi_per_label, labels in [
         (4, 4, [0, 1, 1, 1]),
         (4, 1, [0, 1]),
         (4, 8, [0, 1, 1, 1]),
@@ -159,15 +159,15 @@ def test_manually_defined_file(tmp_path):
             tmp_path,
             ["x", "y", "z", "f1"],
             "target",
-            num_neighbours=num_neighbours,
+            num_nodes=num_nodes,
             max_edge_distance=1.0,
             max_poi_per_label=max_poi_per_label,
         )
         assert len(dataset) == len(labels)
         assert [x[1] for x in dataset] == labels
         for graph, _ in dataset:
-            assert graph.num_nodes() == num_neighbours
-            if num_neighbours == 4:
+            assert graph.num_nodes() == num_nodes
+            if num_nodes == 4:
                 F = np.array(graph.ndata["x"])
                 F = F[F[:, -1].argsort()]
                 assert np.all(
@@ -181,27 +181,27 @@ def test_manually_defined_file(tmp_path):
                         ]
                     )
                 )
-            if num_neighbours <= 4:
-                assert graph.num_edges() == (num_neighbours - 1) * 2 + num_neighbours
+            if num_nodes <= 4:
+                assert graph.num_edges() == (num_nodes - 1) * 2 + num_nodes
             else:
-                N = num_neighbours - 4
+                N = num_nodes - 4
                 assert graph.num_edges() == 3 * 2 + 4 + (N - 1) * 2 + N
 
     # # Increase edge radius to make it a complete graph
-    for num_neighbours in range(2, 8):
+    for num_nodes in range(2, 8):
         dataset = RadarDataset(
             tmp_path,
             ["x", "y", "z", "f1"],
             "target",
-            num_neighbours=num_neighbours,
+            num_nodes=num_nodes,
             max_edge_distance=100.0,
             max_poi_per_label=10,
         )
         assert len(dataset) == len(labels)
         assert [x[1] for x in dataset] == labels
         for graph, _ in dataset:
-            assert graph.num_nodes() == num_neighbours
-            assert graph.num_edges() == num_neighbours**2
+            assert graph.num_nodes() == num_nodes
+            assert graph.num_edges() == num_nodes**2
 
 
 def test_centering_points(tmp_path):
@@ -230,7 +230,7 @@ def test_centering_points(tmp_path):
         tmp_path,
         ["x", "centered_y", "f1"],
         "target",
-        num_neighbours=8,
+        num_nodes=8,
     )
 
     graph, label = dataset[0]
@@ -256,7 +256,7 @@ def test_centering_points(tmp_path):
             tmp_path,
             ["x", "y", "z", "f2"],
             "target",
-            num_neighbours=8,
+            num_nodes=8,
         )
     assert "['f2'] not in index" in str(excinfo.value)
 
@@ -275,7 +275,7 @@ def test_no_graphs(tmp_path):
         tmp_path,
         ["x", "centered_y", "f1"],
         "target",
-        num_neighbours=8,
+        num_nodes=8,
     )
     assert len(dataset) == 0
 
@@ -300,7 +300,7 @@ def test_not_enough_points_in_neighbourhood(tmp_path):
         tmp_path,
         ["x", "y", "z", "f1"],
         "target",
-        num_neighbours=8,
+        num_nodes=8,
         max_edge_distance=2.0,
         max_poi_per_label=10,
     )
@@ -309,7 +309,7 @@ def test_not_enough_points_in_neighbourhood(tmp_path):
         tmp_path,
         ["x", "y", "z", "f1"],
         "target",
-        num_neighbours=9,
+        num_nodes=9,
         max_edge_distance=2.0,
         max_poi_per_label=10,
     )
@@ -318,7 +318,7 @@ def test_not_enough_points_in_neighbourhood(tmp_path):
         pd.read_csv(os.path.join(tmp_path, "two_clusters_one_nan_one_labeled.csv")),
         ["x", "y", "z", "f1"],
         "target",
-        num_neighbours=9,
+        num_nodes=9,
         max_edge_distance=2.0,
         max_poi_per_label=10,
     )

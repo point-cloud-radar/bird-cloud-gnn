@@ -6,8 +6,8 @@ from bird_cloud_gnn.early_stopper import EarlyStopper
 class TensorboardCallback:
     """Callback to populate Tensorboard"""
 
-    def __init__(self):
-        self.writer = SummaryWriter()
+    def __init__(self, **kwargs):
+        self.writer = SummaryWriter(**kwargs)
 
     def __call__(self, epoch_values):
         epoch = epoch_values["epoch"]
