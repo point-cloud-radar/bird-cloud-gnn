@@ -49,6 +49,18 @@ def test_radar_dataset(tmp_path):
         num_nodes=num_nodes,
         max_edge_distance=max_edge_distance,
     )
+    with pytest.raises(ValueError) as excinfo:
+        RadarDataset(
+            tmp_path,
+            features,
+            target,
+            num_nodes=num_nodes,
+            max_edge_distance=max_edge_distance,
+            points_of_interest=[1, 2, 3],
+        )
+    assert "'points_of_interest' can only be used for pandas.Dataframe" in str(
+        excinfo.value
+    )
     assert len(dataset) > 0
     for graph, label in dataset:
         assert graph.num_nodes() == num_nodes
@@ -259,6 +271,29 @@ def test_centering_points(tmp_path):
             num_nodes=8,
         )
     assert "['f2'] not in index" in str(excinfo.value)
+    # Points of interest creates dataset of expected length and changing
+    #  order of point matches order of dataset
+    dataset = RadarDataset(
+        pd.read_csv(str(tmp_path) + "/two_clusters_one_nan_one_labeled.csv"),
+        ["x", "centered_y", "f1"],
+        "target",
+        num_nodes=4,
+        points_of_interest=[1, 2],
+    )
+    assert len(dataset) == 2
+    dataset2 = RadarDataset(
+        pd.read_csv(str(tmp_path) + "/two_clusters_one_nan_one_labeled.csv"),
+        ["x", "centered_y", "f1"],
+        "target",
+        num_nodes=4,
+        points_of_interest=[3, 1, 6],
+    )
+    assert len(dataset2) == 3
+    graph, _ = dataset[0]
+    graph2, _ = dataset2[1]
+
+    assert np.all(np.array(graph.ndata["x"]) == np.array(graph2.ndata["x"]))
+    assert np.all(np.array(graph.edata["a"]) == np.array(graph2.edata["a"]))
 
 
 def test_no_graphs(tmp_path):
