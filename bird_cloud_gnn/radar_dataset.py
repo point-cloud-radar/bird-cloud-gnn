@@ -41,6 +41,7 @@ class RadarDataset(DGLDataset):
         num_nodes=100,
         max_edge_distance=50.0,
         max_poi_per_label=200,
+        points_of_interest=None,
     ):
         """Constructor
 
@@ -52,13 +53,20 @@ class RadarDataset(DGLDataset):
             num_nodes (int, optional): Number of selected neighbours. Defaults to 100.
             max_edge_distance (float, optional): Creates a edge between two nodes if their distance
                 is less than this value. Default to 50.0.
+            points_of_interest (array of int, optional): If `data` is a pandas.Dataframe only generate graphs for these points
 
         Raises:
             ValueError: If `data` is not a valid folder, file or pandas.DataFrame
+            ValueError: 'points_of_interest' can only be used for pandas.Dataframe
+
         """
 
         self.data_path = None
         self.input_data = None
+        if (points_of_interest is not None) and (not isinstance(data, pd.DataFrame)):
+            raise ValueError(
+                "'points_of_interest' can only be used for pandas.Dataframe"
+            )
         if isinstance(data, pd.DataFrame):
             self.input_data = data
             data_hash = pd.util.hash_pandas_object(data).sum()
@@ -76,6 +84,7 @@ class RadarDataset(DGLDataset):
         self.num_nodes = num_nodes
         self.max_edge_distance = max_edge_distance
         self.max_poi_per_label = max_poi_per_label
+        self.points_of_interest = points_of_interest
         self.graphs = []
         self.labels = []
         self.origin = pd.Categorical([])
@@ -89,6 +98,7 @@ class RadarDataset(DGLDataset):
                 max_edge_distance,
                 max_poi_per_label,
                 num_nodes,
+                points_of_interest,
             ),
         )
 
@@ -142,15 +152,18 @@ class RadarDataset(DGLDataset):
             rng = np.random.default_rng()
             return rng.choice(input_array, k, replace=False)
 
-        points_of_interest = np.concatenate(
-            [
-                sample_or_all(
-                    data[data[self.target] == label].index.to_numpy(),
-                    self.max_poi_per_label,
-                )
-                for label in [0, 1]  # Current possible labels
-            ]
-        )
+        if self.points_of_interest is not None:
+            points_of_interest = self.points_of_interest
+        else:
+            points_of_interest = np.concatenate(
+                [
+                    sample_or_all(
+                        data[data[self.target] == label].index.to_numpy(),
+                        self.max_poi_per_label,
+                    )
+                    for label in [0, 1]  # Current possible labels
+                ]
+            )
 
         if self.num_nodes > 1:
             tree = KDTree(data_xyz)
@@ -245,6 +258,7 @@ class RadarDataset(DGLDataset):
                 "num_nodes": self.num_nodes,
                 "origin": self.origin,
                 "target": self.target,
+                "points_of_interest": self.points_of_interest,
             },
         )
 
@@ -268,6 +282,7 @@ class RadarDataset(DGLDataset):
         self.num_nodes = info["num_nodes"]
         self.origin = info["origin"]
         self.target = info["target"]
+        self.points_of_interest = info["points_of_interest"]
 
     def cache_dir(self):
         if self.data_path is None:
