@@ -134,7 +134,6 @@ class RadarDataset(DGLDataset):
         data_features = data[temp_features]
 
         data_target = data[self.target]
-        tree = KDTree(data_xyz)
 
         def sample_or_all(input_array, k):
             if len(input_array) <= k:
@@ -153,17 +152,28 @@ class RadarDataset(DGLDataset):
             ]
         )
 
-        _, poi_indexes = tree.query(data_xyz.loc[points_of_interest], self.num_nodes)
+        if self.num_nodes > 1:
+            tree = KDTree(data_xyz)
+            _, poi_indexes = tree.query(
+                data_xyz.loc[points_of_interest], self.num_nodes
+            )
+        else:
+            poi_indexes = np.reshape(points_of_interest, (-1, 1))
         self.labels = np.concatenate(
             (self.labels, data_target.values[points_of_interest])
         )
         for _, indexes in enumerate(poi_indexes):
             local_xyz = data_xyz.iloc[indexes]
-            local_tree = KDTree(local_xyz)  # slow
-            distances = local_tree.sparse_distance_matrix(
-                local_tree, self.max_edge_distance, output_type="coo_matrix"
-            )
-            graph = dgl.graph((distances.row, distances.col))
+            if self.num_nodes > 1:
+                local_tree = KDTree(local_xyz)
+                distances = local_tree.sparse_distance_matrix(
+                    local_tree, self.max_edge_distance, output_type="coo_matrix"
+                )
+                distances_data = distances.data
+                graph = dgl.graph((distances.row, distances.col))
+            else:
+                distances_data = np.array([0])
+                graph = dgl.graph(([0], [0]))
 
             # TODO: Better fillna
             local_data = data_features.iloc[indexes].fillna(0)
@@ -177,7 +187,7 @@ class RadarDataset(DGLDataset):
             local_data = local_data[self.features]
 
             graph.ndata["x"] = torch.tensor(local_data.values)
-            graph.edata["a"] = torch.tensor(distances.data)
+            graph.edata["a"] = torch.tensor(distances_data)
             self.graphs.append(graph)
         if origin == "":
             origin = pd.util.hash_pandas_object(data).to_string()
