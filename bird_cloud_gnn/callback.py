@@ -1,5 +1,6 @@
 from torch.utils.tensorboard import SummaryWriter
 from bird_cloud_gnn.early_stopper import EarlyStopper
+import numpy as np
 
 
 class TensorboardCallback:
@@ -10,8 +11,20 @@ class TensorboardCallback:
 
     def __call__(self, epoch_values):
         epoch = epoch_values["epoch"]
-        for field in ["Loss/train", "Loss/test", "Accuracy/train", "Accuracy/test"]:
+        layer_names = [
+            key for key, value in epoch_values.items()
+            if "Loss/" in key or "Rate" in key or "Accuracy" in key
+        ]
+        for field in layer_names:
             self.writer.add_scalar(field, epoch_values[field], epoch)
+        layer_names = [
+            key for key, value in epoch_values.items()
+            if "Layer/" in key
+        ]
+        for field in layer_names:
+            self.writer.add_histogram(field, epoch_values[field].numpy(), epoch)
+            self.writer.add_scalar(field.replace("Layer","LayerAverage"), np.average(epoch_values[field].numpy()), epoch)
+
         return False
 
 

@@ -132,6 +132,8 @@ class GCN(nn.Module):
             train_loss = 0.0
             num_correct = 0
             num_total = 0
+            num_false_positive = 0
+            num_false_negative = 0
             self.train()
             for batched_graph, labels in train_dataloader:
                 pred = self(batched_graph, batched_graph.ndata["x"].float())
@@ -140,6 +142,9 @@ class GCN(nn.Module):
                 train_loss += loss.item()
                 num_correct += (pred.argmax(1) == labels).sum().item()
                 num_total += len(labels)
+                if self.num_classes==2:
+                    num_false_positive += ((pred.argmax(1) != labels) & (pred.argmax(1)==1)).sum().item()
+                    num_false_negative += ((pred.argmax(1) != labels) & (pred.argmax(1)==0)).sum().item()
 
                 optimizer.zero_grad()
                 loss.backward()
@@ -147,10 +152,17 @@ class GCN(nn.Module):
 
             epoch_values["Loss/train"] = train_loss
             epoch_values["Accuracy/train"] = num_correct / num_total
+            if self.num_classes==2:
+                epoch_values['FalseNegativeRate/train'] = num_false_negative/num_total
+                epoch_values['FalsePositiveRate/train'] = num_false_positive/num_total
+
+
 
             test_loss = 0.0
             num_correct = 0
             num_total = 0
+            num_false_positive = 0
+            num_false_negative = 0
             self.eval()
             for batched_graph, labels in test_dataloader:
                 pred = self(batched_graph, batched_graph.ndata["x"].float())
@@ -158,9 +170,18 @@ class GCN(nn.Module):
                 test_loss += nn.functional.cross_entropy(pred, labels).item()
                 num_correct += (pred.argmax(1) == labels).sum().item()
                 num_total += len(labels)
+                if self.num_classes==2:
+                    num_false_positive += ((pred.argmax(1) != labels) & (pred.argmax(1)==1)).sum().item()
+                    num_false_negative += ((pred.argmax(1) != labels) & (pred.argmax(1)==0)).sum().item()
+
 
             epoch_values["Loss/test"] = test_loss
             epoch_values["Accuracy/test"] = num_correct / num_total
+            epoch_values["Layer/conv1"] =self.conv1.weight.detach()
+            epoch_values["Layer/conv2"] =self.conv2.weight.detach()
+            if self.num_classes==2:
+                epoch_values['FalseNegativeRate/test'] = num_false_negative/num_total
+                epoch_values['FalsePositiveRate/test'] = num_false_positive/num_total
 
             progress_bar.set_postfix({"Epoch": epoch})
             progress_bar.update(1)
