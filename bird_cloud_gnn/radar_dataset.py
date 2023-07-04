@@ -26,7 +26,7 @@ class RadarDataset(DGLDataset):
         data_folder (str): Folder with the CSV files.
         features (array of str): List of features expected to be present at every CSV file.
         target (str): Target column. 0, 1 or missing expected.
-        num_neighbours (int): If a point has less than this amount of neighbours, it is ignored.
+        num_nodes (int): If a point has less than this amount of neighbours, it is ignored.
         max_edge_distance (float): Creates a edge between two nodes if their distance is less than this value.
         max_poi_per_label (int): Select at most this amount of POIs. If there are more POIs, they are chosen randomly.
     """
@@ -38,7 +38,7 @@ class RadarDataset(DGLDataset):
         features,
         target,
         name="Radar",
-        num_neighbours=100,
+        num_nodes=100,
         max_edge_distance=50.0,
         max_poi_per_label=200,
     ):
@@ -49,7 +49,7 @@ class RadarDataset(DGLDataset):
             features (array of str): List of features expected to be present in every CSV file.
                 If "centered_x" and/or "centered_y" are included these are calculated on the fly.
             target (str): Target column. 0, 1 or missing expected.
-            num_neighbours (int, optional): Number of selected neighbours. Defaults to 100.
+            num_nodes (int, optional): Number of selected neighbours. Defaults to 100.
             max_edge_distance (float, optional): Creates a edge between two nodes if their distance
                 is less than this value. Default to 50.0.
 
@@ -73,7 +73,7 @@ class RadarDataset(DGLDataset):
         self._name = name
         self.features = features
         self.target = target
-        self.num_neighbours = num_neighbours
+        self.num_nodes = num_nodes
         self.max_edge_distance = max_edge_distance
         self.max_poi_per_label = max_poi_per_label
         self.graphs = []
@@ -88,7 +88,7 @@ class RadarDataset(DGLDataset):
                 target,
                 max_edge_distance,
                 max_poi_per_label,
-                num_neighbours,
+                num_nodes,
             ),
         )
 
@@ -117,9 +117,9 @@ class RadarDataset(DGLDataset):
                 )
             ].index
         ).reset_index(drop=True)
-        if len(data) < self.num_neighbours:
+        if len(data) < self.num_nodes:
             print(
-                f"Warning: There are not enough points in {origin} to form neighbourhood of size {self.num_neighbours}"
+                f"Warning: There are not enough points in {origin} to form neighbourhood of size {self.num_nodes}"
             )
             return
 
@@ -153,9 +153,7 @@ class RadarDataset(DGLDataset):
             ]
         )
 
-        _, poi_indexes = tree.query(
-            data_xyz.loc[points_of_interest], self.num_neighbours
-        )
+        _, poi_indexes = tree.query(data_xyz.loc[points_of_interest], self.num_nodes)
         self.labels = np.concatenate(
             (self.labels, data_target.values[points_of_interest])
         )
@@ -234,7 +232,7 @@ class RadarDataset(DGLDataset):
                 "features": self.features,
                 "max_edge_distance": self.max_edge_distance,
                 "max_poi_per_label": self.max_poi_per_label,
-                "num_neighbours": self.num_neighbours,
+                "num_nodes": self.num_nodes,
                 "origin": self.origin,
                 "target": self.target,
             },
@@ -257,7 +255,7 @@ class RadarDataset(DGLDataset):
         self.features = info["features"]
         self.max_edge_distance = info["max_edge_distance"]
         self.max_poi_per_label = info["max_poi_per_label"]
-        self.num_neighbours = info["num_neighbours"]
+        self.num_nodes = info["num_nodes"]
         self.origin = info["origin"]
         self.target = info["target"]
 
