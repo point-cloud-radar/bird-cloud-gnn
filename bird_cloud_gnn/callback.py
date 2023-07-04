@@ -13,12 +13,13 @@ class TensorboardCallback:
         epoch = epoch_values["epoch"]
         layer_names = [
             key
-            for key, value in epoch_values.items()
+            for key in epoch_values.keys()
             if "Loss/" in key or "Rate" in key or "Accuracy" in key
         ]
         for field in layer_names:
             self.writer.add_scalar(field, epoch_values[field], epoch)
-        layer_names = [key for key, value in epoch_values.items() if "Layer/" in key]
+
+        layer_names = [key for key in epoch_values.keys() if "Layer/" in key]
         for field in layer_names:
             self.writer.add_histogram(field, epoch_values[field].numpy(), epoch)
             self.writer.add_scalar(
