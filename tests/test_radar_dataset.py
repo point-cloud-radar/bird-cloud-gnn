@@ -397,3 +397,60 @@ def test_num_nodes_equal_to_1(tmp_path):
     assert len(dataset) == 4
     for graph, _ in dataset:
         assert graph.num_nodes() == 1
+
+
+def test_add_edges_to_poi(tmp_path):
+    with open(
+        tmp_path / "two_clusters_one_nan_one_labeled.csv", "w", encoding="utf-8"
+    ) as f:
+        f.write(
+            """range,x,y,z,f1,target
+10000,2,2,2,1,
+10000,0,2,2,2,
+10000,2,0,2,3,
+10000,2,2,0,4,
+10000,5,5,5,5,0
+10000,6,5,5,6,1
+10000,5,6,5,7,1
+10000,5,5,6,8,1"""
+        )
+
+    for num_nodes in range(1, 8):
+        dataset = RadarDataset(
+            tmp_path,
+            ["x", "y", "z", "f1"],
+            "target",
+            num_nodes=num_nodes,
+            max_edge_distance=0.0,
+            max_poi_per_label=10,
+            add_edges_to_poi=True,
+        )
+        for graph, _ in dataset:
+            assert graph.num_edges() == num_nodes + 2 * (num_nodes - 1)
+
+    for num_nodes in range(4, 8):
+        dataset = RadarDataset(
+            tmp_path,
+            ["x", "y", "z", "f1"],
+            "target",
+            num_nodes=num_nodes,
+            max_edge_distance=1.5,  # enough for cluster (5,5) to connect but not for cluster (0,0)
+            max_poi_per_label=10,
+            add_edges_to_poi=True,
+        )
+        for graph, _ in dataset:
+            # cluster (5, 5) to each other + self + extra to poi
+            assert graph.num_edges() == 4 * 3 + num_nodes + 2 * (num_nodes - 4)
+
+    for num_nodes in range(1, 8):
+        dataset = RadarDataset(
+            tmp_path,
+            ["x", "y", "z", "f1"],
+            "target",
+            num_nodes=num_nodes,
+            max_edge_distance=25.0,
+            max_poi_per_label=10,
+            add_edges_to_poi=True,
+        )
+        for graph, _ in dataset:
+            assert graph.num_edges() == num_nodes * num_nodes
