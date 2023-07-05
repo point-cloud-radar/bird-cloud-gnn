@@ -101,8 +101,8 @@ def leave_one_origin_out_evaluate(
     print(origins)
 
     for origin in unique_origins:
-        train_idx = origins[origins == origin].index.to_list()
-        test_idx = origins[origins != origin].index.to_list()
+        train_idx = origins[origins != origin].index.to_list()
+        test_idx = origins[origins == origin].index.to_list()
 
         train_dataloader, test_dataloader = get_dataloaders(
             dataset, train_idx, test_idx, batch_size
