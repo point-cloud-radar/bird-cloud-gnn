@@ -111,6 +111,9 @@ class GCN(nn.Module):
         callback=None,
         learning_rate=0.01,
         num_epochs=20,
+        sch_explr_gamma=0.99,
+        sch_multisteplr_milestones=None,
+        sch_multisteplr_gamma=0.1,
     ):
         """Fit the model while evaluating every iteraction.
 
@@ -124,8 +127,18 @@ class GCN(nn.Module):
             learning_rate (float, optional): Learning rate. Defaults to 0.01.
             num_epochs (int, optional): Number of training epochs. Defaults to 20.
         """
+        if sch_multisteplr_milestones is None:
+            sch_multisteplr_milestones = range(0, num_epochs, 100)
         progress_bar = tqdm(total=num_epochs)
         optimizer = optim.Adam(self.parameters(), lr=learning_rate)
+        schedulers = [
+            optim.lr_scheduler.ExponentialLR(optimizer, gamma=sch_explr_gamma),
+            optim.lr_scheduler.MultiStepLR(
+                optimizer,
+                milestones=sch_multisteplr_milestones,
+                gamma=sch_multisteplr_gamma,
+            ),
+        ]
         epoch_values = {}
         for epoch in range(num_epochs):
             epoch_values["epoch"] = epoch
@@ -198,6 +211,9 @@ class GCN(nn.Module):
 
             progress_bar.set_postfix({"Epoch": epoch})
             progress_bar.update(1)
+
+            for scheduler in schedulers:
+                scheduler.step()
 
             if callback is not None:
                 user_request_stop = callback(epoch_values)
