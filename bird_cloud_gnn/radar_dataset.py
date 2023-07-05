@@ -31,6 +31,17 @@ class RadarDataset(DGLDataset):
         max_poi_per_label (int): Select at most this amount of POIs. If there are more POIs, they are chosen randomly.
     """
 
+    missing_indicator_skip_columns = [
+        "range",
+        "azimuth",
+        "elevation",
+        "x",
+        "y",
+        "z",
+        "centered_x",
+        "centered_y",
+    ]
+
     # pylint: disable=too-many-arguments
     def __init__(
         self,
@@ -42,6 +53,7 @@ class RadarDataset(DGLDataset):
         max_edge_distance=50.0,
         max_poi_per_label=200,
         points_of_interest=None,
+        use_missing_indicator_columns=False,
     ):
         """Constructor
 
@@ -54,6 +66,7 @@ class RadarDataset(DGLDataset):
             max_edge_distance (float, optional): Creates a edge between two nodes if their distance
                 is less than this value. Default to 50.0.
             points_of_interest (array of int, optional): If `data` is a pandas.Dataframe only generate graphs for these points
+            use_missing_indicator_columns (bool, optional): Whether to add columns of 0s and 1s indicating values that are missing.
 
         Raises:
             ValueError: If `data` is not a valid folder, file or pandas.DataFrame
@@ -85,6 +98,13 @@ class RadarDataset(DGLDataset):
         self.max_edge_distance = max_edge_distance
         self.max_poi_per_label = max_poi_per_label
         self.points_of_interest = points_of_interest
+        self.use_missing_indicator_columns = use_missing_indicator_columns
+        if use_missing_indicator_columns:
+            self.features = self.features + [
+                c + "_isna"
+                for c in self.features
+                if c not in RadarDataset.missing_indicator_skip_columns
+            ]
         self.graphs = []
         self.labels = []
         self.origin = pd.Categorical([])
@@ -99,6 +119,7 @@ class RadarDataset(DGLDataset):
                 max_poi_per_label,
                 num_nodes,
                 points_of_interest,
+                use_missing_indicator_columns,
             ),
         )
 
@@ -116,6 +137,7 @@ class RadarDataset(DGLDataset):
             data = pd.read_csv(data_path)
         self._process_data(data, origin=data_path)
 
+    # pylint: disable=too-many-branches
     def _process_data(self, data, origin=""):
         xyz = ["x", "y", "z"]
 
@@ -141,7 +163,16 @@ class RadarDataset(DGLDataset):
         if "centered_y" in temp_features:
             temp_features.remove("centered_y")
 
-        data_features = data[temp_features]
+        if self.use_missing_indicator_columns:
+            for column in temp_features:
+                if (
+                    column in RadarDataset.missing_indicator_skip_columns
+                    or "_isna" in column
+                ):
+                    continue
+                data[column + "_isna"] = data[column].isna().astype("float64")
+
+        data_features = data[temp_features].fillna(0)
 
         data_target = data[self.target]
 
@@ -176,7 +207,9 @@ class RadarDataset(DGLDataset):
             (self.labels, data_target.values[points_of_interest])
         )
         for _, indexes in enumerate(poi_indexes):
-            local_xyz = data_xyz.iloc[indexes]
+            local_xyz = data_xyz.iloc[indexes].reset_index(drop=True)
+            local_data = data_features.iloc[indexes].reset_index(drop=True)
+
             if self.num_nodes > 1:
                 local_tree = KDTree(local_xyz)
                 distances = local_tree.sparse_distance_matrix(
@@ -188,15 +221,12 @@ class RadarDataset(DGLDataset):
                 distances_data = np.array([0])
                 graph = dgl.graph(([0], [0]))
 
-            # TODO: Better fillna
-            local_data = data_features.iloc[indexes].fillna(0)
             # calculate special features on the fly for each graph
             if "centered_x" in self.features:
-                local_data["centered_x"] = local_xyz[xyz[0]] - local_xyz[xyz[0]].iloc[0]
+                local_data["centered_x"] = local_xyz["x"] - local_xyz.loc[0, "x"]
             if "centered_y" in self.features:
-                local_data["centered_y"] = local_xyz[xyz[1]] - local_xyz[xyz[1]].iloc[0]
+                local_data["centered_y"] = local_xyz["y"] - local_xyz.loc[0, "y"]
 
-            # ensure column order is the same as in self.features
             local_data = local_data[self.features]
 
             graph.ndata["x"] = torch.tensor(local_data.values)

@@ -153,7 +153,7 @@ def test_manually_defined_file(tmp_path):
 10000,1,1,0,4,
 10000,5,5,5,5,0
 10000,6,5,5,6,1
-10000,5,6,5,7,1
+10000,5,6,5,,1
 10000,5,5,6,8,1"""
         )
 
@@ -167,37 +167,45 @@ def test_manually_defined_file(tmp_path):
         (6, 4, [0, 1, 1, 1]),
         (8, 4, [0, 1, 1, 1]),
     ]:
-        dataset = RadarDataset(
-            tmp_path,
-            ["x", "y", "z", "f1"],
-            "target",
-            num_nodes=num_nodes,
-            max_edge_distance=1.0,
-            max_poi_per_label=max_poi_per_label,
-        )
-        assert len(dataset) == len(labels)
-        assert [x[1] for x in dataset] == labels
-        for graph, _ in dataset:
-            assert graph.num_nodes() == num_nodes
-            if num_nodes == 4:
-                F = np.array(graph.ndata["x"])
-                F = F[F[:, -1].argsort()]
-                assert np.all(
-                    F
-                    == np.array(
+        for use_missing_indicator_columns in [False, True]:
+            dataset = RadarDataset(
+                tmp_path,
+                ["x", "y", "z", "f1"],
+                "target",
+                num_nodes=num_nodes,
+                max_edge_distance=1.0,
+                max_poi_per_label=max_poi_per_label,
+                use_missing_indicator_columns=use_missing_indicator_columns,
+            )
+            assert len(dataset) == len(labels)
+            assert [x[1] for x in dataset] == labels
+            if use_missing_indicator_columns:
+                assert dataset.features == ["x", "y", "z", "f1", "f1_isna"]
+            else:
+                assert dataset.features == ["x", "y", "z", "f1"]
+            for graph, _ in dataset:
+                assert graph.num_nodes() == num_nodes
+                if num_nodes == 4:
+                    expected = np.array(
                         [
+                            [5, 6, 5, 0],
                             [5, 5, 5, 5],
                             [6, 5, 5, 6],
-                            [5, 6, 5, 7],
                             [5, 5, 6, 8],
                         ]
                     )
-                )
-            if num_nodes <= 4:
-                assert graph.num_edges() == (num_nodes - 1) * 2 + num_nodes
-            else:
-                N = num_nodes - 4
-                assert graph.num_edges() == 3 * 2 + 4 + (N - 1) * 2 + N
+                    if use_missing_indicator_columns:
+                        expected = np.concatenate(
+                            (expected, np.array([[1], [0], [0], [0]])), axis=1
+                        )
+                    F = np.array(graph.ndata["x"])
+                    F = F[F[:, 3].argsort()]
+                    assert np.all(F == expected)
+                if num_nodes <= 4:
+                    assert graph.num_edges() == (num_nodes - 1) * 2 + num_nodes
+                else:
+                    N = num_nodes - 4
+                    assert graph.num_edges() == 3 * 2 + 4 + (N - 1) * 2 + N
 
     # # Increase edge radius to make it a complete graph
     for num_nodes in range(2, 8):
@@ -243,6 +251,7 @@ def test_centering_points(tmp_path):
         ["x", "centered_y", "f1"],
         "target",
         num_nodes=8,
+        use_missing_indicator_columns=False,
     )
 
     graph, label = dataset[0]
@@ -270,7 +279,8 @@ def test_centering_points(tmp_path):
             "target",
             num_nodes=8,
         )
-    assert "['f2'] not in index" in str(excinfo.value)
+    assert "f2" in str(excinfo.value)
+
     # Points of interest creates dataset of expected length and changing
     #  order of point matches order of dataset
     dataset = RadarDataset(
