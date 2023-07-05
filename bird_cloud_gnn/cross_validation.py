@@ -116,7 +116,9 @@ def leave_one_origin_out_evaluate(
         model.fit(train_dataloader, learning_rate=learning_rate, num_epochs=num_epochs)
 
         accuracy = model.evaluate(test_dataloader)
-        print(f"Origin {origin} - Test accuracy: {accuracy} - Length test: {len(test_idx)}")
+        print(
+            f"Origin {origin} - Test accuracy: {accuracy} - Length test: {len(test_idx)}"
+        )
 
         progress_bar.set_postfix({"Origin": origin})
         progress_bar.update(1)
