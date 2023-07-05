@@ -43,6 +43,18 @@ class GCN(nn.Module):
         self.conv1 = GraphConv(in_feats, h_feats)
         self.conv2 = GraphConv(h_feats, num_classes)
 
+    def oneline_description(self):
+        """Description of the model to uniquely identify it in logs"""
+        return "-".join(
+            [
+                "in",
+                f"GC_{self.h_feats}",
+                "RELU",
+                f"GC_{self.num_classes}",
+                "mean-out",
+            ]
+        )
+
     def forward(self, g, in_feat):
         """
         The forward function computes the output of the model.
