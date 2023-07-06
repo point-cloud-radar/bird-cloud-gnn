@@ -54,6 +54,7 @@ class RadarDataset(DGLDataset):
         max_poi_per_label=200,
         points_of_interest=None,
         use_missing_indicator_columns=False,
+        add_edges_to_poi=False,
     ):
         """Constructor
 
@@ -67,6 +68,7 @@ class RadarDataset(DGLDataset):
                 is less than this value. Default to 50.0.
             points_of_interest (array of int, optional): If `data` is a pandas.Dataframe only generate graphs for these points
             use_missing_indicator_columns (bool, optional): Whether to add columns of 0s and 1s indicating values that are missing.
+            add_edges_to_poi (bool, optional): Whether to add extra edges to the point of interest regardless of the edge distance.
 
         Raises:
             ValueError: If `data` is not a valid folder, file or pandas.DataFrame
@@ -99,6 +101,7 @@ class RadarDataset(DGLDataset):
         self.max_poi_per_label = max_poi_per_label
         self.points_of_interest = points_of_interest
         self.use_missing_indicator_columns = use_missing_indicator_columns
+        self.add_edges_to_poi = add_edges_to_poi
         if use_missing_indicator_columns:
             self.features = self.features + [
                 c + "_isna"
@@ -120,6 +123,7 @@ class RadarDataset(DGLDataset):
                 num_nodes,
                 points_of_interest,
                 use_missing_indicator_columns,
+                add_edges_to_poi,
             ),
         )
 
@@ -232,8 +236,29 @@ class RadarDataset(DGLDataset):
                 distances = local_tree.sparse_distance_matrix(
                     local_tree, self.max_edge_distance, output_type="coo_matrix"
                 )
+                distances_row = distances.row
+                distances_col = distances.col
                 distances_data = distances.data
-                graph = dgl.graph((distances.row, distances.col))
+                if self.add_edges_to_poi:
+                    to_poi = local_tree.query(local_xyz.loc[0, :], self.num_nodes)
+                    distances_row = np.concatenate(
+                        (
+                            distances_row,
+                            to_poi[1],
+                            np.zeros(self.num_nodes, dtype="int"),
+                        )
+                    )
+                    distances_col = np.concatenate(
+                        (
+                            distances_col,
+                            np.zeros(self.num_nodes, dtype="int"),
+                            to_poi[1],
+                        )
+                    )
+                    distances_data = np.concatenate(
+                        (distances_data, to_poi[0], to_poi[0])
+                    )
+                graph = dgl.graph((distances_row, distances_col))
             else:
                 distances_data = np.array([0])
                 graph = dgl.graph(([0], [0]))
@@ -248,6 +273,7 @@ class RadarDataset(DGLDataset):
 
             graph.ndata["x"] = torch.tensor(local_data.values)
             graph.edata["a"] = torch.tensor(distances_data)
+            graph = graph.to_simple(copy_ndata=True, copy_edata=True)
             self.graphs.append(graph)
         if origin == "":
             origin = pd.util.hash_pandas_object(data).to_string()
@@ -306,6 +332,8 @@ class RadarDataset(DGLDataset):
                 "origin": self.origin,
                 "target": self.target,
                 "points_of_interest": self.points_of_interest,
+                "use_missing_indicator_columns": self.use_missing_indicator_columns,
+                "add_edges_to_poi": self.add_edges_to_poi,
             },
         )
 
@@ -330,6 +358,8 @@ class RadarDataset(DGLDataset):
         self.origin = info["origin"]
         self.target = info["target"]
         self.points_of_interest = info["points_of_interest"]
+        self.use_missing_indicator_columns = info["use_missing_indicator_columns"]
+        self.add_edges_to_poi = info["add_edges_to_poi"]
 
     def cache_dir(self):
         if self.data_path is None:
