@@ -126,9 +126,14 @@ class GCN(nn.Module):
                 Defaults to None.
             learning_rate (float, optional): Learning rate. Defaults to 0.01.
             num_epochs (int, optional): Number of training epochs. Defaults to 20.
+            sch_explr_gamma (float): The exponential decay rate of the learning rate.
+            sch_multisteplr_milestones (list): epoch numbers where the learning rate is decreased
+                by a factor of sch_multisteplr_gamma. If none this is done at epoch 100
+            sch_multisteplr_gamma (float): If a stepped decay of the learning rate is taken,
+                the multiplication factor
         """
         if sch_multisteplr_milestones is None:
-            sch_multisteplr_milestones = range(0, num_epochs, 100)
+            sch_multisteplr_milestones = min(num_epochs, 100)
         progress_bar = tqdm(total=num_epochs)
         optimizer = optim.Adam(self.parameters(), lr=learning_rate)
         schedulers = [
@@ -205,6 +210,10 @@ class GCN(nn.Module):
             epoch_values["Accuracy/test"] = num_correct / num_total
             epoch_values["Layer/conv1"] = self.conv1.weight.detach()
             epoch_values["Layer/conv2"] = self.conv2.weight.detach()
+            i = 0
+            for pg in optimizer.param_groups:
+                epoch_values[f"LearningRate/ParGrp{i}"] = pg["lr"]
+                i = i + 1
             if self.num_classes == 2:
                 epoch_values["FalseNegativeRate/test"] = num_false_negative / num_total
                 epoch_values["FalsePositiveRate/test"] = num_false_positive / num_total
