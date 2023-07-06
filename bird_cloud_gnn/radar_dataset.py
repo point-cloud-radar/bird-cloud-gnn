@@ -42,6 +42,7 @@ class RadarDataset(DGLDataset):
         max_edge_distance=50.0,
         max_poi_per_label=200,
         points_of_interest=None,
+        skip_cache=False,
     ):
         """Constructor
 
@@ -54,6 +55,7 @@ class RadarDataset(DGLDataset):
             max_edge_distance (float, optional): Creates a edge between two nodes if their distance
                 is less than this value. Default to 50.0.
             points_of_interest (array of int, optional): If `data` is a pandas.Dataframe only generate graphs for these points
+            skip_cache (logical): If true not cache is saved to disk
 
         Raises:
             ValueError: If `data` is not a valid folder, file or pandas.DataFrame
@@ -88,6 +90,7 @@ class RadarDataset(DGLDataset):
         self.graphs = []
         self.labels = []
         self.origin = pd.Categorical([])
+        self.skip_cache = skip_cache
         super().__init__(
             name=name,
             hash_key=(
@@ -240,6 +243,8 @@ class RadarDataset(DGLDataset):
 
     def save(self):
         if len(self.graphs) == 0:
+            return
+        if self.skip_cache:
             return
         graph_path = os.path.join(
             self.cache_dir(), f"dataset_storage_{self.name}_{self.hash}.bin"
