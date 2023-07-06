@@ -128,7 +128,7 @@ class GCN(nn.Module):
             num_epochs (int, optional): Number of training epochs. Defaults to 20.
             sch_explr_gamma (float): The exponential decay rate of the learning rate.
             sch_multisteplr_milestones (list): epoch numbers where the learning rate is decreased
-                by a factor of sch_multisteplr_gamma. If none this is done at epoch 100
+                by a factor of sch_multisteplr_gamma. If None this is done at epoch 100
             sch_multisteplr_gamma (float): If a stepped decay of the learning rate is taken,
                 the multiplication factor
         """
