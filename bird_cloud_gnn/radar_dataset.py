@@ -123,6 +123,23 @@ class RadarDataset(DGLDataset):
             ),
         )
 
+    def oneline_description(self):
+        """Description of the dataset to uniquely identify it in logs"""
+        return (
+            "-".join(
+                [
+                    self.hash,
+                    f"MED_{self.max_edge_distance}",
+                    f"NN_{self.num_nodes}",
+                    f"MPPL_{self.max_poi_per_label}",
+                    f"UMIC_{self.use_missing_indicator_columns}",
+                    f"AETP_{self.add_edges_to_poi}",
+                ]
+            )
+            + "-features_"
+            + "-".join(self.features)
+        )
+
     def _read_one_file(self, data_path):
         """Reads a file and creates the graphs and labels for it."""
         split_on_dots = data_path.split(".")
