@@ -210,10 +210,8 @@ class GCN(nn.Module):
             epoch_values["Accuracy/test"] = num_correct / num_total
             epoch_values["Layer/conv1"] = self.conv1.weight.detach()
             epoch_values["Layer/conv2"] = self.conv2.weight.detach()
-            i = 0
-            for pg in optimizer.param_groups:
+            for i, pg in enumerate(optimizer.param_groups):
                 epoch_values[f"LearningRate/ParGrp{i}"] = pg["lr"]
-                i = i + 1
             if self.num_classes == 2:
                 epoch_values["FalseNegativeRate/test"] = num_false_negative / num_total
                 epoch_values["FalsePositiveRate/test"] = num_false_positive / num_total
