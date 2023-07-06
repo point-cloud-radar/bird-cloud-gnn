@@ -133,7 +133,7 @@ class GCN(nn.Module):
                 the multiplication factor
         """
         if sch_multisteplr_milestones is None:
-            sch_multisteplr_milestones = min(num_epochs, 100)
+            sch_multisteplr_milestones = [min(num_epochs, 100)]
         progress_bar = tqdm(total=num_epochs)
         optimizer = optim.Adam(self.parameters(), lr=learning_rate)
         schedulers = [
