@@ -40,8 +40,12 @@ class GCN(nn.Module):
         self.in_feats = in_feats
         self.h_feats = h_feats
         self.num_classes = num_classes
+        # self.conv1 = GraphConv(in_feats, h_feats)
+        # self.conv2 = GraphConv(h_feats, h_feats)
+        # self.conv3 = GraphConv(h_feats, num_classes)
         self.conv1 = GraphConv(in_feats, h_feats)
         self.conv2 = GraphConv(h_feats, num_classes)
+        # self.dropout = nn.Dropout(0.2)
 
     def oneline_description(self):
         """Description of the model to uniquely identify it in logs"""
@@ -70,6 +74,9 @@ class GCN(nn.Module):
         h = self.conv1(g, in_feat)
         h = F.relu(h)
         h = self.conv2(g, h)
+        # h = F.relu(h)
+        # h = self.dropout(h)
+        # h = self.conv3(g, h)
         g.ndata["h"] = h
         return dgl.mean_nodes(g, "h")
 
@@ -222,8 +229,12 @@ class GCN(nn.Module):
             epoch_values["Accuracy/test"] = num_correct / num_total
             epoch_values["Layer/conv1"] = self.conv1.weight.detach()
             epoch_values["Layer/conv2"] = self.conv2.weight.detach()
+<<<<<<< HEAD
             for i, pg in enumerate(optimizer.param_groups):
                 epoch_values[f"LearningRate/ParGrp{i}"] = pg["lr"]
+=======
+            # epoch_values["Layer/conv3"] = self.conv3.weight.detach()
+>>>>>>> experimenting 3 layers
             if self.num_classes == 2:
                 epoch_values["FalseNegativeRate/test"] = num_false_negative / num_total
                 epoch_values["FalsePositiveRate/test"] = num_false_positive / num_total
