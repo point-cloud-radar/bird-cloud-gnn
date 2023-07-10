@@ -9,7 +9,7 @@ from tqdm import tqdm
 from bird_cloud_gnn.gnn_model import GCN
 
 
-def get_dataloaders(dataset, train_idx, test_idx, batch_size):
+def get_dataloaders(dataset, train_idx, test_idx, batch_size, shuffle_train=True):
     train_sampler = SubsetRandomSampler(train_idx)
     test_sampler = SubsetRandomSampler(test_idx)
 
@@ -18,12 +18,14 @@ def get_dataloaders(dataset, train_idx, test_idx, batch_size):
         sampler=train_sampler,
         batch_size=batch_size,
         drop_last=False,
+        shuffle=shuffle_train,
     )
     test_dataloader = GraphDataLoader(
         dataset=dataset,
         sampler=test_sampler,
         batch_size=batch_size,
         drop_last=False,
+        shuffle=False,
     )
 
     return train_dataloader, test_dataloader
