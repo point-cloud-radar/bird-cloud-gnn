@@ -8,8 +8,8 @@ from dgl.dataloading import GraphDataLoader
 from dgl.nn.pytorch.conv import GraphConv
 from torch import nn
 from torch import optim
-from tqdm import tqdm
 from torch.nn.modules import Module
+from tqdm import tqdm
 
 
 os.environ["DGLBACKEND"] = "pytorch"
@@ -50,17 +50,13 @@ class GCN(nn.Module):
                 ), "Each tuples should contain a size (int) and a torch.nn.modules.Module."
                 self.layers.append(activation)
                 self.name = self.name + "ReLU_"
-            self.num_classes = size  # the last size should correspond to the number of classes were predicting
+            self.num_classes = (
+                size
+            )  # the last size should correspond to the number of classes were predicting
 
     def oneline_description(self):
         """Description of the model to uniquely identify it in logs"""
-        return "-".join(
-            [
-                "in_",
-                f"{self.name}",
-                "mean-out",
-            ]
-        )
+        return "-".join(["in_", f"{self.name}", "mean-out"])
 
     def forward(self, g, in_feats):
         """
@@ -263,10 +259,7 @@ class GCN(nn.Module):
         """
         self.eval()
         dataloader = GraphDataLoader(
-            shuffle=False,
-            dataset=dataset,
-            batch_size=batch_size,
-            drop_last=False,
+            shuffle=False, dataset=dataset, batch_size=batch_size, drop_last=False
         )
         labels = np.array([])
         for batched_graph, _ in dataloader:
