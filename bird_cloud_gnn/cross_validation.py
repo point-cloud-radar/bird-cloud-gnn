@@ -2,11 +2,11 @@
 """
 import numpy as np
 import pandas as pd
-from bird_cloud_gnn.gnn_model import GCN
 from dgl.dataloading import GraphDataLoader
 from sklearn.model_selection import StratifiedKFold
 from torch.utils.data.sampler import SubsetRandomSampler
 from tqdm import tqdm
+from bird_cloud_gnn.gnn_model import GCN
 
 
 def get_dataloaders(dataset, train_idx, test_idx, batch_size):

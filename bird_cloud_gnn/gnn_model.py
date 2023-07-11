@@ -1,14 +1,15 @@
 """Module for creating GCN class"""
 
 import os
-
 import dgl
 import numpy as np
 from dgl.dataloading import GraphDataLoader
 from dgl.nn.pytorch.conv import GraphConv
-from torch import nn, optim
+from torch import nn
+from torch import optim
 from torch.nn.modules import Module
 from tqdm import tqdm
+
 
 os.environ["DGLBACKEND"] = "pytorch"
 
@@ -47,7 +48,7 @@ class GCN(nn.Module):
                     activation, Module
                 ), "Each tuples should contain a size (int) and a torch.nn.modules.Module."
                 self.layers.append(activation)
-                self.name = self.name + "ReLU_"
+                self.name = self.name + repr(activation).split("(", 1)[0] + "_"
             self.num_classes = size  # the last size should correspond to the number of classes were predicting
 
     def oneline_description(self):
@@ -67,7 +68,7 @@ class GCN(nn.Module):
             The output of the second convolutional layer
         """
         for layer in self.layers:
-            if isinstance(layer, nn.ReLU):
+            if isinstance(layer, (nn.ReLU, nn.LeakyReLU, nn.ELU)):
                 in_feats = layer(in_feats)
             else:
                 in_feats = layer(g, in_feats)

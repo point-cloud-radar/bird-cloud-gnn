@@ -1,9 +1,7 @@
 """Tests for cross_validation"""
-from bird_cloud_gnn.cross_validation import (
-    kfold_evaluate,
-    leave_one_origin_out_evaluate,
-)
 from torch import nn
+from bird_cloud_gnn.cross_validation import kfold_evaluate
+from bird_cloud_gnn.cross_validation import leave_one_origin_out_evaluate
 
 
 def test_kfold_evaluate(dataset_fixture):
