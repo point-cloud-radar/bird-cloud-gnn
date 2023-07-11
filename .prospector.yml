@@ -12,6 +12,9 @@ member-warnings: false
 ignore-paths:
   - docs
 
+mccabe:
+    run: false
+
 pyroma:
     run: true
 

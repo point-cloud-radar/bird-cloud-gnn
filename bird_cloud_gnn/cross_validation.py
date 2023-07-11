@@ -101,8 +101,8 @@ def leave_one_origin_out_evaluate(
     print(origins)
 
     for origin in unique_origins:
-        train_idx = origins[origins == origin].index.to_list()
-        test_idx = origins[origins != origin].index.to_list()
+        train_idx = origins[origins != origin].index.to_list()
+        test_idx = origins[origins == origin].index.to_list()
 
         train_dataloader, test_dataloader = get_dataloaders(
             dataset, train_idx, test_idx, batch_size
@@ -116,7 +116,9 @@ def leave_one_origin_out_evaluate(
         model.fit(train_dataloader, learning_rate=learning_rate, num_epochs=num_epochs)
 
         accuracy = model.evaluate(test_dataloader)
-        print(f"Origin {origin} - Test accuracy: {accuracy}")
+        print(
+            f"Origin {origin} - Test accuracy: {accuracy} - Length test: {len(test_idx)}"
+        )
 
         progress_bar.set_postfix({"Origin": origin})
         progress_bar.update(1)
