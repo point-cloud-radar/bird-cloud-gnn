@@ -32,7 +32,7 @@ def get_dataloaders(dataset, train_idx, test_idx, batch_size):
 # pylint: disable=too-many-arguments, too-many-locals
 def kfold_evaluate(
     dataset,
-    h_feats=16,
+    layers_data,
     n_splits=5,
     learning_rate=0.01,
     num_epochs=100,
@@ -43,7 +43,7 @@ def kfold_evaluate(
 
     Args:
         dataset (RadarDataset): The dataset
-        h_feats (int, optional): The number of hidden features of the model
+        layers_data (list): The list of input size and activation
         n_splits (int, optional): Number of folds. Defaults to 5.
         learning_rate (float, optional): Learning rate. Defaults to 0.01.
         num_epochs (int, optional): Training epochs. Defaults to 20.
@@ -62,8 +62,7 @@ def kfold_evaluate(
 
         model = GCN(
             in_feats=len(dataset.features),
-            h_feats=h_feats,
-            num_classes=2,
+            layers_data=layers_data,
         )
         model.fit(train_dataloader, learning_rate=learning_rate, num_epochs=num_epochs)
 
@@ -76,7 +75,7 @@ def kfold_evaluate(
 
 def leave_one_origin_out_evaluate(
     dataset,
-    h_feats=16,
+    layers_data,
     learning_rate=0.01,
     num_epochs=100,
     batch_size=512,
@@ -88,7 +87,7 @@ def leave_one_origin_out_evaluate(
 
     Args:
         dataset (RadarDataset): The dataset.
-        h_feats (int, optional): The number of hidden features of the model
+        layers_data (list): The list of input size and activation
         n_splits (int, optional): Number of folds. Defaults to 5.
         learning_rate (float, optional): Learning rate. Defaults to 0.01.
         num_epochs (int, optional): Training epochs. Defaults to 20.
@@ -110,8 +109,7 @@ def leave_one_origin_out_evaluate(
 
         model = GCN(
             in_feats=len(dataset.features),
-            h_feats=h_feats,
-            num_classes=2,
+            layers_data=layers_data,
         )
         model.fit(train_dataloader, learning_rate=learning_rate, num_epochs=num_epochs)
 

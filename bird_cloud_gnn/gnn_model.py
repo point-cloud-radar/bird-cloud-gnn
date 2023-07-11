@@ -3,11 +3,11 @@
 import os
 import dgl
 import numpy as np
-import torch.nn.functional as F
 from dgl.dataloading import GraphDataLoader
 from dgl.nn.pytorch.conv import GraphConv
 from torch import nn
 from torch import optim
+from torch.nn.modules import Module
 from tqdm import tqdm
 
 
@@ -17,11 +17,11 @@ os.environ["DGLBACKEND"] = "pytorch"
 class GCN(nn.Module):
     """Graph Convolutional Network construction module
 
-    A two-layer GCN is constructed from input dimension, hidden dimensions and number of classes.
-    Each layer computes new node representations by aggregating neighbor information.
+    A n-layer GCN is constructed from input features and list of layers
+    Each layer computes new node representations by aggregating neighbour information.
     """
 
-    def __init__(self, in_feats: int, h_feats: int, num_classes: int):
+    def __init__(self, in_feats: int, layers_data: list):
         """
         The __init__ function is the constructor for a class. It is called when an object of that class is instantiated.
         It can have multiple arguments and it will always be called before __new__().
@@ -30,32 +30,32 @@ class GCN(nn.Module):
         Args:
             self: Access variables that belongs to the class object
             in_feats: the number of input features
-            h_feats: the number of hidden features that we want to use for our first graph convolutional layer
-            num_classes: the number of classes that we want to predict
+            layers_data: is a list of tuples of size of hidden layer and activation function
 
         Returns:
             The self object
         """
         super().__init__()
         self.in_feats = in_feats
-        self.h_feats = h_feats
-        self.num_classes = num_classes
-        self.conv1 = GraphConv(in_feats, h_feats)
-        self.conv2 = GraphConv(h_feats, num_classes)
+        self.layers = nn.ModuleList()
+        self.name = ""
+        for size, activation in layers_data:
+            self.layers.append(GraphConv(in_feats, size))
+            self.name = self.name + f"{in_feats}-{size}_"
+            in_feats = size  # For the next layer
+            if activation is not None:
+                assert isinstance(
+                    activation, Module
+                ), "Each tuples should contain a size (int) and a torch.nn.modules.Module."
+                self.layers.append(activation)
+                self.name = self.name + repr(activation).split("(", 1)[0] + "_"
+            self.num_classes = size  # the last size should correspond to the number of classes were predicting
 
     def oneline_description(self):
         """Description of the model to uniquely identify it in logs"""
-        return "-".join(
-            [
-                "in",
-                f"GC_{self.h_feats}",
-                "RELU",
-                f"GC_{self.num_classes}",
-                "mean-out",
-            ]
-        )
+        return "-".join(["in_", f"{self.name}", "mean-out"])
 
-    def forward(self, g, in_feat):
+    def forward(self, g, in_feats):
         """
         The forward function computes the output of the model.
 
@@ -67,10 +67,13 @@ class GCN(nn.Module):
         Returns:
             The output of the second convolutional layer
         """
-        h = self.conv1(g, in_feat)
-        h = F.relu(h)
-        h = self.conv2(g, h)
-        g.ndata["h"] = h
+        for layer in self.layers:
+            if isinstance(layer, (nn.ReLU, nn.LeakyReLU, nn.ELU)):
+                in_feats = layer(in_feats)
+            else:
+                in_feats = layer(g, in_feats)
+
+        g.ndata["h"] = in_feats
         return dgl.mean_nodes(g, "h")
 
     def fit(self, train_dataloader, learning_rate=0.01, num_epochs=20):
@@ -220,10 +223,13 @@ class GCN(nn.Module):
 
             epoch_values["Loss/test"] = test_loss
             epoch_values["Accuracy/test"] = num_correct / num_total
-            epoch_values["Layer/conv1"] = self.conv1.weight.detach()
-            epoch_values["Layer/conv2"] = self.conv2.weight.detach()
+
             for i, pg in enumerate(optimizer.param_groups):
                 epoch_values[f"LearningRate/ParGrp{i}"] = pg["lr"]
+            # to visualise distribution of tensors
+            for i, layer in enumerate(self.layers):
+                if not isinstance(layer, (nn.ReLU, nn.LeakyReLU, nn.ELU)):
+                    epoch_values[f"Layer/conv{i}"] = layer.weight.detach()
             if self.num_classes == 2:
                 epoch_values["FalseNegativeRate/test"] = num_false_negative / num_total
                 epoch_values["FalsePositiveRate/test"] = num_false_positive / num_total
@@ -251,10 +257,7 @@ class GCN(nn.Module):
         """
         self.eval()
         dataloader = GraphDataLoader(
-            shuffle=False,
-            dataset=dataset,
-            batch_size=batch_size,
-            drop_last=False,
+            shuffle=False, dataset=dataset, batch_size=batch_size, drop_last=False
         )
         labels = np.array([])
         for batched_graph, _ in dataloader:

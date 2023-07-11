@@ -1,6 +1,7 @@
 """Tests for gnn_model module"""
 import torch
 from dgl.dataloading import GraphDataLoader
+from torch import nn
 from torch.utils.data.sampler import SubsetRandomSampler
 from bird_cloud_gnn.callback import CombinedCallback
 from bird_cloud_gnn.callback import EarlyStopperCallback
@@ -30,7 +31,7 @@ def test_gnn_model(dataset_fixture):
         drop_last=False,
     )
 
-    model = GCN(len(dataset_fixture.features), 16, 2)
+    model = GCN(len(dataset_fixture.features), [(16, nn.ReLU()), (2, None)])
     model.fit(train_dataloader)
     model.evaluate(test_dataloader)
 
@@ -53,13 +54,20 @@ class TestBasicBehaviour:
 
     def test_field_access(self):
         """Test field access"""
-        model = GCN(in_feats=10, h_feats=16, num_classes=2)
+        model = GCN(in_feats=10, layers_data=[(16, nn.ReLU()), (2, None)])
         assert model.in_feats == 10
-        assert model.h_feats == 16
+        assert model.name == "10-16_ReLU_16-2_"
         assert model.num_classes == 2
 
     def test_inequality(self):
         """Test inequality of created GCN classes"""
-        model1 = GCN(in_feats=10, h_feats=16, num_classes=2)
-        model2 = GCN(in_feats=15, h_feats=16, num_classes=5)
+        model1 = GCN(in_feats=10, layers_data=[(16, nn.ReLU()), (2, None)])
+        model2 = GCN(in_feats=15, layers_data=[(16, nn.ReLU()), (2, None)])
         assert model1 != model2
+
+    def test_inequality_activation(self):
+        """Test inequality of created GCN classes with different activation"""
+        model1 = GCN(in_feats=10, layers_data=[(16, nn.ReLU()), (2, None)])
+        model2 = GCN(in_feats=10, layers_data=[(16, nn.ELU()), (2, None)])
+        assert model1 != model2
+        assert model2.name == "10-16_ELU_16-2_"
