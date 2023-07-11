@@ -6,6 +6,7 @@ from bird_cloud_gnn.callback import CombinedCallback
 from bird_cloud_gnn.callback import EarlyStopperCallback
 from bird_cloud_gnn.callback import TensorboardCallback
 from bird_cloud_gnn.gnn_model import GCN
+from torch import nn
 
 
 def test_gnn_model(dataset_fixture):
@@ -30,7 +31,7 @@ def test_gnn_model(dataset_fixture):
         drop_last=False,
     )
 
-    model = GCN(len(dataset_fixture.features), 16, 2)
+    model = GCN(len(dataset_fixture.features), [(16, nn.ReLU()), (2, None)])
     model.fit(train_dataloader)
     model.evaluate(test_dataloader)
 
@@ -53,13 +54,13 @@ class TestBasicBehaviour:
 
     def test_field_access(self):
         """Test field access"""
-        model = GCN(in_feats=10, h_feats=16, num_classes=2)
+        model = GCN(in_feats=10, layers_data=[(16, nn.ReLU()), (2, None)])
         assert model.in_feats == 10
-        assert model.h_feats == 16
+        assert model.name == "10-16_ReLU_16-2_"
         assert model.num_classes == 2
 
     def test_inequality(self):
         """Test inequality of created GCN classes"""
-        model1 = GCN(in_feats=10, h_feats=16, num_classes=2)
-        model2 = GCN(in_feats=15, h_feats=16, num_classes=5)
+        model1 = GCN(in_feats=10, layers_data=[(16, nn.ReLU()), (2, None)])
+        model2 = GCN(in_feats=15, layers_data=[(16, nn.ReLU()), (2, None)])
         assert model1 != model2
