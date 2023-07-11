@@ -223,12 +223,13 @@ class GCN(nn.Module):
 
             epoch_values["Loss/test"] = test_loss
             epoch_values["Accuracy/test"] = num_correct / num_total
-            # to visualise distribution of tensors
-            # epoch_values["Layer/conv1"] = self.conv1.weight.detach()
 
             for i, pg in enumerate(optimizer.param_groups):
                 epoch_values[f"LearningRate/ParGrp{i}"] = pg["lr"]
-            # epoch_values["Layer/conv3"] = self.conv3.weight.detach()
+            # to visualise distribution of tensors
+            for i, layer in enumerate(self.layers):
+                if not isinstance(layer, (nn.ReLU, nn.LeakyReLU, nn.ELU)):
+                    epoch_values[f"Layer/conv{i}"] = layer.weight.detach()
             if self.num_classes == 2:
                 epoch_values["FalseNegativeRate/test"] = num_false_negative / num_total
                 epoch_values["FalsePositiveRate/test"] = num_false_positive / num_total
