@@ -1,12 +1,14 @@
 """Tests for gnn_model module"""
 import torch
-from dgl.dataloading import GraphDataLoader
-from torch.utils.data.sampler import SubsetRandomSampler
-from bird_cloud_gnn.callback import CombinedCallback
-from bird_cloud_gnn.callback import EarlyStopperCallback
-from bird_cloud_gnn.callback import TensorboardCallback
+from bird_cloud_gnn.callback import (
+    CombinedCallback,
+    EarlyStopperCallback,
+    TensorboardCallback,
+)
 from bird_cloud_gnn.gnn_model import GCN
+from dgl.dataloading import GraphDataLoader
 from torch import nn
+from torch.utils.data.sampler import SubsetRandomSampler
 
 
 def test_gnn_model(dataset_fixture):
