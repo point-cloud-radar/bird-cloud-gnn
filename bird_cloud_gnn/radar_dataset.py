@@ -55,6 +55,7 @@ class RadarDataset(DGLDataset):
         points_of_interest=None,
         use_missing_indicator_columns=False,
         add_edges_to_poi=False,
+        skip_cache=False,
     ):
         """Constructor
 
@@ -69,6 +70,8 @@ class RadarDataset(DGLDataset):
             points_of_interest (array of int, optional): If `data` is a pandas.Dataframe only generate graphs for these points
             use_missing_indicator_columns (bool, optional): Whether to add columns of 0s and 1s indicating values that are missing.
             add_edges_to_poi (bool, optional): Whether to add extra edges to the point of interest regardless of the edge distance.
+            skip_cache (logical): If true not cache is saved to disk
+
 
         Raises:
             ValueError: If `data` is not a valid folder, file or pandas.DataFrame
@@ -111,6 +114,7 @@ class RadarDataset(DGLDataset):
         self.graphs = []
         self.labels = []
         self.origin = pd.Categorical([])
+        self.skip_cache = skip_cache
         super().__init__(
             name=name,
             hash_key=(
@@ -313,6 +317,8 @@ class RadarDataset(DGLDataset):
 
     def save(self):
         if len(self.graphs) == 0:
+            return
+        if self.skip_cache:
             return
         graph_path = os.path.join(
             self.cache_dir(), f"dataset_storage_{self.name}_{self.hash}.bin"
