@@ -19,7 +19,7 @@
 
 project = "bird_cloud_gnn"
 copyright = "2023, Netherlands eScience Center"
-author = "Olga Lyashevska"
+author = "Olga Lyashevska and Abel S.Sequeira"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

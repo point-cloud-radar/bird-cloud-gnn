@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to bird_cloud_gnn's documentation!
+Welcome to bird_cloud_gnn's documentation, a package to classify points from point cloud data using graph neural networks.
 ==========================================================
 
 .. toctree::
@@ -12,6 +12,8 @@ Welcome to bird_cloud_gnn's documentation!
 
 Indices and tables
 ==================
+
+TODO
 
 * :ref:`genindex`
 * :ref:`modindex`
