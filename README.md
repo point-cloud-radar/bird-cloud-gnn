@@ -1,30 +1,30 @@
-## Badges
+# Bird Cloud GNN
 
-(Customize these badges with your own links, and check https://shields.io/ or https://badgen.net/ to see which other badges are available.)
+[![github repo badge](https://img.shields.io/badge/github-repo-000.svg?logo=github&labelColor=gray&color=blue)](https://github.com/point-cloud-radar/bird-cloud-gnn)
+[![github license badge](https://img.shields.io/github/license/point-cloud-radar/bird-cloud-gnn)](https://github.com/point-cloud-radar/bird-cloud-gnn)
+[![RSD]( https://img.shields.io/badge/rsd-bird_cloud_gnn-blue)](https://research-software-directory.org/projects/bird-movements-with-meteorological-radar)
+[![fair-software badge](https://img.shields.io/badge/fair--software.eu-%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8B-yellow)](https://fair-software.eu)
+[![workflow scq badge](https://sonarcloud.io/api/project_badges/measure?project=point-cloud-radar_bird-cloud-gnn&metric=alert_status)](https://sonarcloud.io/dashboard?id=point-cloud-radar_bird-cloud-gnn)
+[![workflow scc badge](https://sonarcloud.io/api/project_badges/measure?project=point-cloud-radar_bird-cloud-gnn&metric=coverage)](https://sonarcloud.io/dashboard?id=point-cloud-radar_bird-cloud-gnn)
+[![read the docs badge](https://readthedocs.org/projects/bird-cloud-gnn/badge/?version=latest)](https://bird-cloud-gnn.readthedocs.io/en/latest/?badge=latest)
+[![build](https://github.com/point-cloud-radar/bird-cloud-gnn/actions/workflows/build.yml/badge.svg)](https://github.com/point-cloud-radar/bird-cloud-gnn/actions/workflows/build.yml)
+[![cffconvert](https://github.com/point-cloud-radar/bird-cloud-gnn/actions/workflows/cffconvert.yml/badge.svg)](https://github.com/point-cloud-radar/bird-cloud-gnn/actions/workflows/cffconvert.yml)
+[![sonarcloud](https://github.com/point-cloud-radar/bird-cloud-gnn/actions/workflows/sonarcloud.yml/badge.svg)](https://github.com/point-cloud-radar/bird-cloud-gnn/actions/workflows/sonarcloud.yml)
+[![markdown-link-check](https://github.com/point-cloud-radar/bird-cloud-gnn/actions/workflows/markdown-link-check.yml/badge.svg)](https://github.com/point-cloud-radar/bird-cloud-gnn/actions/workflows/markdown-link-check.yml)
 
-| fair-software.eu recommendations | |
-| :-- | :--  |
-| (1/5) code repository              | [![github repo badge](https://img.shields.io/badge/github-repo-000.svg?logo=github&labelColor=gray&color=blue)](https://github.com/point-cloud-radar/bird-cloud-gnn) |
-| (2/5) license                      | [![github license badge](https://img.shields.io/github/license/point-cloud-radar/bird-cloud-gnn)](https://github.com/point-cloud-radar/bird-cloud-gnn) |
-| (3/5) community registry           | TODO: Add to RSD and to PYPI |
-| (4/5) citation                     | TODO: Waiting for DOI |
-| (5/5) checklist                    | TODO: Add CII badge |
-| howfairis                          | [![fair-software badge](https://img.shields.io/badge/fair--software.eu-%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8B-yellow)](https://fair-software.eu) |
-| **Other best practices**           | &nbsp; |
-| Static analysis                    | [![workflow scq badge](https://sonarcloud.io/api/project_badges/measure?project=point-cloud-radar_bird-cloud-gnn&metric=alert_status)](https://sonarcloud.io/dashboard?id=point-cloud-radar_bird-cloud-gnn) |
-| Coverage                           | [![workflow scc badge](https://sonarcloud.io/api/project_badges/measure?project=point-cloud-radar_bird-cloud-gnn&metric=coverage)](https://sonarcloud.io/dashboard?id=point-cloud-radar_bird-cloud-gnn) |
-| Documentation                      | [![Documentation Status](https://readthedocs.org/projects/bird-cloud-gnn/badge/?version=latest)](https://bird-cloud-gnn.readthedocs.io/en/latest/?badge=latest) |
-| **GitHub Actions**                 | &nbsp; |
-| Build                              | [![build](https://github.com/point-cloud-radar/bird-cloud-gnn/actions/workflows/build.yml/badge.svg)](https://github.com/point-cloud-radar/bird-cloud-gnn/actions/workflows/build.yml) |
-| Citation data consistency               | [![cffconvert](https://github.com/point-cloud-radar/bird-cloud-gnn/actions/workflows/cffconvert.yml/badge.svg)](https://github.com/point-cloud-radar/bird-cloud-gnn/actions/workflows/cffconvert.yml) |
-| SonarCloud                         | [![sonarcloud](https://github.com/point-cloud-radar/bird-cloud-gnn/actions/workflows/sonarcloud.yml/badge.svg)](https://github.com/point-cloud-radar/bird-cloud-gnn/actions/workflows/sonarcloud.yml) |
-| MarkDown link checker              | [![markdown-link-check](https://github.com/point-cloud-radar/bird-cloud-gnn/actions/workflows/markdown-link-check.yml/badge.svg)](https://github.com/point-cloud-radar/bird-cloud-gnn/actions/workflows/markdown-link-check.yml) |
+
+
+<!-- [![DOI](https://zenodo.org/badge/500818250.svg)](https://zenodo.org/badge/latestdoi/500818250) -->
+<!-- [![docker hub badge](https://img.shields.io/static/v1?label=Docker%20Hub&message=mexca&color=blue&style=flat&logo=docker)](https://hub.docker.com/u/mexca) -->
+<!-- [![docker build badge](https://img.shields.io/github/actions/workflow/status/mexca/mexca/docker.yml?label=Docker%20build&logo=docker)](https://github.com/mexca/mexca/actions/workflows/docker.yml) -->
+[![black code style badge](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
+
 
 ## How to use bird_cloud_gnn
 
 Graph Neural Network for bird point cloud data
 
-The project setup is documented in [project_setup.md](project_setup.md). Feel free to remove this document (and/or the link to this document) if you don't need it.
 
 ## Installation
 
@@ -38,7 +38,7 @@ python3 -m pip install .
 
 ## Documentation
 
-Include a link to your project's full documentation here.
+The documentation can be found on [Read the Docs](https://bird-cloud-gnn.readthedocs.io/en/latest/index.html).
 
 ## Contributing
 
