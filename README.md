@@ -19,12 +19,14 @@
 <!-- [![docker build badge](https://img.shields.io/github/actions/workflow/status/mexca/mexca/docker.yml?label=Docker%20build&logo=docker)](https://github.com/mexca/mexca/actions/workflows/docker.yml) -->
 [![black code style badge](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
+## Synopsis
 
+This software produces a graph representation derived from point cloud data, which is then used as input for a Graph Neural Network (GNN).This allows to increase the amount of data by the factor of 1000.
 
-## How to use bird_cloud_gnn
+## Code example
 
-Graph Neural Network for bird point cloud data
-
+## Motivation
+In scenarios where labeled data is limited, there's a pressing need to expand the dataset effectively. One effective strategy involves altering the data's representation. In this context, we adopted such an approach by acquiring a graph representation from point cloud data. Depending on the chosen parameters, this transformation can augment the dataset by a factor of up to 1000. Subsequently, this graph representation is harnessed as input for Graph Neural Networks (GNNs). GNNs are highly sought after due to their innate ability to adeptly capture and leverage the inherent properties of graph-structured data. They excel in modeling intricate network relationships, autonomously acquiring informative features, and facilitating effective knowledge transfer.
 
 ## Installation
 
