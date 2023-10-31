@@ -4,12 +4,31 @@ from bird_cloud_gnn.early_stopper import EarlyStopper
 
 
 class TensorboardCallback:
-    """Callback to populate Tensorboard"""
+    """Callback to populate Tensorboard.
+
+    This class provides a callback function to populate Tensorboard with scalar and histogram summaries
+    during training. The callback function takes in epoch values and adds scalar and histogram summaries
+    to Tensorboard for each field in the epoch values that matches certain criteria.
+
+    Args:
+        **kwargs: Additional arguments to pass to the SummaryWriter constructor.
+
+    Attributes:
+        writer: A SummaryWriter object used to write summaries to Tensorboard.
+    """
 
     def __init__(self, **kwargs):
         self.writer = SummaryWriter(**kwargs)
 
     def __call__(self, epoch_values):
+        """Callback function to populate Tensorboard with scalar and histogram summaries.
+
+        Args:
+            epoch_values: A dictionary containing the values for each field at the current epoch.
+
+        Returns:
+            False, indicating that the training should continue.
+        """
         epoch = epoch_values["epoch"]
         layer_names = [
             key
