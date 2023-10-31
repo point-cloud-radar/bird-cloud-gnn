@@ -51,7 +51,11 @@ class TensorboardCallback:
 
 
 class EarlyStopperCallback:
-    """Callback to check early stopping."""
+    """
+    Callback to check early stopping.
+
+    This callback is used to check if the training should be stopped early based on the validation loss.
+    """
 
     def __init__(self, **kwargs):
         """Input arguments are passed to EarlyStopper."""
@@ -62,14 +66,19 @@ class EarlyStopperCallback:
 
 
 class CombinedCallback:
-    """Helper to combine multiple callbacks."""
+    """Helper to combine multiple callbacks.
+
+    This class allows multiple callbacks to be combined into a single callback. The callbacks are called in the given
+    sequence and if one of them returns True, the subsequent callbacks are not called.
+
+    Args:
+        callbacks (iterable): List of callbacks to be combined.
+
+    Returns:
+        bool: True if any of the callbacks return True, False otherwise.
+    """
 
     def __init__(self, callbacks):
-        """
-        Args:
-            callbacks (iterable): List of callbacks. These are called in the given sequence and
-                if one of them returns True, the subsequents are not called.
-        """
         self.callbacks = callbacks
 
     def __call__(self, epoch_values):

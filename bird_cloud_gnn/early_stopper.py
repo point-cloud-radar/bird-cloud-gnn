@@ -4,22 +4,42 @@ import numpy as np
 
 
 class EarlyStopper:
-    """Early stopper check."""
+    """Early stopper check.
+
+    This class is used to stop the training process if the validation loss starts increasing. The validation loss is
+    considered to be increasing if it is greater than the minimum validation loss found so far plus an absolute and/or
+    relative tolerance. The class keeps track of the minimum validation loss found so far and the number of consecutive
+    iterations where the validation loss has increased. If the number of consecutive iterations where the validation
+    loss has increased exceeds a certain threshold, the training process is stopped.
+
+    Attributes:
+        patience (int): How many consecutive iterations to wait before stopping.
+        min_abs_delta (float): Absolute tolerance to the increase.
+        min_rel_delta (float): Relative tolerance to the increase.
+        counter (int): Number of consecutive iterations where the validation loss has increased.
+        min_validation_loss (float): Minimum validation loss found so far.
+
+    Methods:
+        __init__(self, patience=3, min_abs_delta=1e-2, min_rel_delta=0.0): Initializes the EarlyStopper object.
+        early_stop(self, validation_loss): Checks whether it is time to stop, and updates the internal state of the
+            EarlyStopper object.
+
+    Example usage:
+        early_stopper = EarlyStopper(patience=5, min_abs_delta=0.1, min_rel_delta=0.01)
+        for epoch in range(num_epochs):
+            train_loss = train(model, train_loader)
+            val_loss = validate(model, val_loader)
+            if early_stopper.early_stop(val_loss):
+                print(f"Validation loss has been increasing for {early_stopper.patience} consecutive epochs. "
+                      f"Training stopped.")
+                break
+    """
 
     def __init__(self, patience=3, min_abs_delta=1e-2, min_rel_delta=0.0):
-        """EarlyStopper. Use to stop if the validation loss starts increasing.
-        The validation loss is increasing if
-
-            L > Lmin + abs_delta + rel_delta * |Lmin|,
-
-        where `L` is the current validation loss, `Lmin` is the minimum validation loss found so
-        far, and `abs_delta` and `rel_delta` are absolute and relative tolerances to the increase,
-        respectively.
-
+        """Initializes the EarlyStopper object.
 
         Args:
-            patience (int, optional): How many consecutive iterations to wait before stopping.
-                Defaults to 3.
+            patience (int, optional): How many consecutive iterations to wait before stopping. Defaults to 3.
             min_abs_delta (float, optional): Absolute tolerance to the increase. Defaults to 1e-2.
             min_rel_delta (float, optional): Relative tolerance to the increase. Defaults to 0.0.
         """
@@ -30,7 +50,7 @@ class EarlyStopper:
         self.min_validation_loss = np.inf
 
     def early_stop(self, validation_loss):
-        """Check whether it is time to stop, and update the internal of EarlyStopper.
+        """Checks whether it is time to stop, and updates the internal state of the EarlyStopper object.
 
         Args:
             validation_loss (float): Current validation loss

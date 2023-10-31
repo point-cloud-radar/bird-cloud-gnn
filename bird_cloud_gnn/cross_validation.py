@@ -10,6 +10,18 @@ from bird_cloud_gnn.gnn_model import GCN
 
 
 def get_dataloaders(dataset, train_idx, test_idx, batch_size):
+    """
+    Returns train and test dataloaders for a given dataset, train indices, test indices, and batch size.
+
+    Args:
+        dataset (torch_geometric.datasets): The dataset to use for creating dataloaders.
+        train_idx (list): The indices to use for training.
+        test_idx (list): The indices to use for testing.
+        batch_size (int): The batch size to use for the dataloaders.
+
+    Returns:
+        tuple: A tuple containing the train and test dataloaders.
+    """
     train_sampler = SubsetRandomSampler(train_idx)
     test_sampler = SubsetRandomSampler(test_idx)
 
@@ -48,8 +60,10 @@ def kfold_evaluate(
         learning_rate (float, optional): Learning rate. Defaults to 0.01.
         num_epochs (int, optional): Training epochs. Defaults to 20.
         batch_size (int, optional): Batch size used in the data loaders. Defaults to 512.
-    """
 
+    Returns:
+        None
+    """
     labels = np.array(dataset.labels)
     # Initialize a stratified k-fold splitter
     kfold = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
