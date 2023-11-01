@@ -1,14 +1,15 @@
 """Module for creating GCN class"""
 
 import os
-
 import dgl
 import numpy as np
 from dgl.dataloading import GraphDataLoader
 from dgl.nn.pytorch.conv import GraphConv
-from torch import nn, optim
+from torch import nn
+from torch import optim
 from torch.nn.modules import Module
 from tqdm import tqdm
+
 
 os.environ["DGLBACKEND"] = "pytorch"
 
@@ -34,7 +35,9 @@ class GCN(nn.Module):
         forward(g, in_feats): Computes the output of the model.
         fit(train_dataloader, learning_rate=0.01, num_epochs=20): Train the model.
         evaluate(test_dataloader): Evaluate model.
-        fit_and_evaluate(train_dataloader, test_dataloader, callback=None, learning_rate=0.01, num_epochs=20, sch_explr_gamma=0.99, sch_multisteplr_milestones=None, sch_multisteplr_gamma=0.1): Fit the model while evaluating every iteraction.
+        fit_and_evaluate(train_dataloader, test_dataloader, callback=None, learning_rate=0.01,
+        num_epochs=20, sch_explr_gamma=0.99, sch_multisteplr_milestones=None,
+        sch_multisteplr_gamma=0.1): Fit the model while evaluating every iteraction.
     """
 
     def __init__(self, in_feats: int, layers_data: list):

@@ -50,8 +50,8 @@ def generate_data(
             used internally for predicting the target class. Defaults to 300.0.
 
     Returns:
-        pandas.DataFrames: Generated data. It is also saved to `filename` if that argument is
-            passed.
+        pandas.DataFrames: Generated data. It is also saved to `filename`
+        if that argument is passed.
     """
 
     point_cloud = pd.DataFrame(
