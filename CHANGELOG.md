@@ -10,5 +10,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First release.
 
+<!-- markdown-link-check-disable -->
 [Unreleased]: https://github.com/point-cloud-radar/bird-cloud-gnn/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/point-cloud-radar/bird-cloud-gnn/releases/tag/v0.1.0
