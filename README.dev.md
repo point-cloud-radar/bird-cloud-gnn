@@ -165,10 +165,11 @@ rm -rf bird_cloud_gnn.egg-info
 rm -rf dist
 
 # create the source distribution and the wheel
-python3 setup.py sdist bdist_wheel
+python3 -m build
 
 # upload to test pypi instance (requires credentials)
-twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+twine upload -u __token__ -p THETOKEN -r testpypi dist/*
+
 ```
 
 Visit
@@ -200,7 +201,7 @@ Then upload to pypi.org with:
 ```shell
 # Back to the first terminal,
 # FINAL STEP: upload to PyPI (requires credentials)
-twine upload dist/*
+twine upload -u __token__ -p THETOKEN dist/*
 ```
 
 ### (3/3) GitHub
