@@ -1,5 +1,6 @@
 # This CITATION.cff file was generated with cffinit.
 # Visit https://bit.ly/cffinit to generate yours today!
+
 cff-version: 1.2.0
 title: bird-cloud-gnn
 message: >-
@@ -17,9 +18,21 @@ authors:
     email: abel.s.siqueira@gmail.com
     affiliation: Netherlands eScience Center
     orcid: 'https://orcid.org/0000-0003-4451-281X'
+  - given-names: Bart
+    email: b.kranstauber@uva.nl
+    family-names: Kranstauber
+    affiliation: University of Amsterdam
+    orcid: 'https://orcid.org/0000-0001-8303-780X'
+  - given-names: 'Bart '
+    family-names: Hoekstra
+    email: b.d.hoekstra@uva.nl
+    affiliation: University of Amsterdam
+    orcid: 'https://orcid.org/0000-0002-7085-3805'
 repository-code: 'https://github.com/point-cloud-radar/bird-cloud-gnn'
 keywords:
   - point cloud
   - graph neural network
   - bird identification
 license: Apache-2.0
+version: 0.1.0
+date-released: '2023-11-28'
