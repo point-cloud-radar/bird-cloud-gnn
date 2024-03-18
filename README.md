@@ -25,6 +25,7 @@ This software produces a graph representation derived from point cloud data, whi
 
 ## Code example
 
+See some examples of usage in [bird-cloud-gnn-experiments](https://github.com/point-cloud-radar/bird-cloud-gnn-experiments) repo.
 ## Motivation
 In scenarios where labeled data is limited, there's a pressing need to expand the dataset effectively. One effective strategy involves altering the data's representation. In this context, we adopted such an approach by acquiring a graph representation from point cloud data. Depending on the chosen parameters, this transformation can augment the dataset by a factor of up to 1000. Subsequently, this graph representation is harnessed as input for Graph Neural Networks (GNNs). GNNs are highly sought after due to their innate ability to adeptly capture and leverage the inherent properties of graph-structured data. They excel in modeling intricate network relationships, autonomously acquiring informative features, and facilitating effective knowledge transfer.
 
