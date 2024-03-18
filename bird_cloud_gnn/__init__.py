@@ -1,4 +1,5 @@
 """Documentation about bird_cloud_gnn"""
+
 import logging
 
 
