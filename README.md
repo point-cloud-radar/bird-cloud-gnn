@@ -12,8 +12,7 @@
 [![sonarcloud](https://github.com/point-cloud-radar/bird-cloud-gnn/actions/workflows/sonarcloud.yml/badge.svg)](https://github.com/point-cloud-radar/bird-cloud-gnn/actions/workflows/sonarcloud.yml)
 [![markdown-link-check](https://github.com/point-cloud-radar/bird-cloud-gnn/actions/workflows/markdown-link-check.yml/badge.svg)](https://github.com/point-cloud-radar/bird-cloud-gnn/actions/workflows/markdown-link-check.yml)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10214001.svg)](https://doi.org/10.5281/zenodo.10214001)
-<!-- [![docker hub badge](https://img.shields.io/static/v1?label=Docker%20Hub&message=mexca&color=blue&style=flat&logo=docker)](https://hub.docker.com/u/mexca) -->
-<!-- [![docker build badge](https://img.shields.io/github/actions/workflow/status/mexca/mexca/docker.yml?label=Docker%20build&logo=docker)](https://github.com/mexca/mexca/actions/workflows/docker.yml) -->
+![](https://img.shields.io/pypi/v/bird-cloud-gnn)
 [![black code style badge](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 ## Synopsis
