@@ -1,6 +1,6 @@
 """Documentation about bird_cloud_gnn"""
-import logging
 
+import logging
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 
