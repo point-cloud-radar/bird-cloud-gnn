@@ -145,8 +145,7 @@ def test_manually_defined_file(tmp_path):
     with open(
         tmp_path / "two_clusters_one_nan_one_labeled.csv", "w", encoding="utf-8"
     ) as f:
-        f.write(
-            """range,x,y,z,f1,target
+        f.write("""range,x,y,z,f1,target
 10000,1,1,1,1,
 10000,0,1,1,2,
 10000,1,0,1,3,
@@ -154,8 +153,7 @@ def test_manually_defined_file(tmp_path):
 10000,5,5,5,5,0
 10000,6,5,5,6,1
 10000,5,6,5,,1
-10000,5,5,6,8,1"""
-        )
+10000,5,5,6,8,1""")
 
     # No constraints on max_poi
     for num_nodes, max_poi_per_label, labels in [
@@ -234,8 +232,7 @@ def test_centering_points(tmp_path):
     with open(
         tmp_path / "two_clusters_one_nan_one_labeled.csv", "w", encoding="utf-8"
     ) as f:
-        f.write(
-            """range,x,y,z,f1,target
+        f.write("""range,x,y,z,f1,target
 10000,1,1,1,1,
 10000,1,0,0,2,
 10000,0,1,0,3,
@@ -243,8 +240,7 @@ def test_centering_points(tmp_path):
 10000,5,5,5,5,0
 10000,6,5,5,6,1
 10000,5,6,5,7,1
-10000,5,5,6,8,1"""
-        )
+10000,5,5,6,8,1""")
 
     dataset = RadarDataset(
         tmp_path,
@@ -308,13 +304,11 @@ def test_centering_points(tmp_path):
 
 def test_no_graphs(tmp_path):
     with open(tmp_path / "no_graphs.csv", "w", encoding="utf-8") as f:
-        f.write(
-            """range,x,y,z,f1,target
+        f.write("""range,x,y,z,f1,target
 10000,1,1,1,1,
 10000,0,1,1,2,
 10000,1,0,1,3,
-10000,1,1,0,4,"""
-        )
+10000,1,1,0,4,""")
 
     dataset = RadarDataset(
         tmp_path,
@@ -329,8 +323,7 @@ def test_not_enough_points_in_neighbourhood(tmp_path):
     with open(
         tmp_path / "two_clusters_one_nan_one_labeled.csv", "w", encoding="utf-8"
     ) as f:
-        f.write(
-            """range,x,y,z,f1,target
+        f.write("""range,x,y,z,f1,target
 10000,1,1,1,1,
 10000,0,1,1,2,
 10000,1,0,1,3,
@@ -338,8 +331,7 @@ def test_not_enough_points_in_neighbourhood(tmp_path):
 10000,5,5,5,5,0
 10000,6,5,5,6,1
 10000,5,6,5,7,1
-10000,5,5,6,8,1"""
-        )
+10000,5,5,6,8,1""")
 
     dataset = RadarDataset(
         tmp_path,
@@ -374,8 +366,7 @@ def test_num_nodes_equal_to_1(tmp_path):
     with open(
         tmp_path / "two_clusters_one_nan_one_labeled.csv", "w", encoding="utf-8"
     ) as f:
-        f.write(
-            """range,x,y,z,f1,target
+        f.write("""range,x,y,z,f1,target
 10000,1,1,1,1,
 10000,0,1,1,2,
 10000,1,0,1,3,
@@ -383,8 +374,7 @@ def test_num_nodes_equal_to_1(tmp_path):
 10000,5,5,5,5,0
 10000,6,5,5,6,1
 10000,5,6,5,7,1
-10000,5,5,6,8,1"""
-        )
+10000,5,5,6,8,1""")
 
     dataset = RadarDataset(
         tmp_path,
@@ -403,8 +393,7 @@ def test_add_edges_to_poi(tmp_path):
     with open(
         tmp_path / "two_clusters_one_nan_one_labeled.csv", "w", encoding="utf-8"
     ) as f:
-        f.write(
-            """range,x,y,z,f1,target
+        f.write("""range,x,y,z,f1,target
 10000,2,2,2,1,
 10000,0,2,2,2,
 10000,2,0,2,3,
@@ -412,8 +401,7 @@ def test_add_edges_to_poi(tmp_path):
 10000,5,5,5,5,0
 10000,6,5,5,6,1
 10000,5,6,5,7,1
-10000,5,5,6,8,1"""
-        )
+10000,5,5,6,8,1""")
 
     for num_nodes in range(1, 8):
         dataset = RadarDataset(
