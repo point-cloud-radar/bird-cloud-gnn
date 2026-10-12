@@ -126,9 +126,9 @@ def generate_data(
         point_cloud.loc[
             np.random.randint(0, num_points, num_points // 100), "feat2"
         ] = None
-        point_cloud.loc[
-            np.random.randint(0, num_points, num_points // 20), "feat3"
-        ] = None
+        point_cloud.loc[np.random.randint(0, num_points, num_points // 20), "feat3"] = (
+            None
+        )
 
     if filename is not None:
         point_cloud.to_csv(filename, index=None)
