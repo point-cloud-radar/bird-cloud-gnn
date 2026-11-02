@@ -1,4 +1,5 @@
 """Tests for gnn_model module"""
+
 import torch
 from dgl.dataloading import GraphDataLoader
 from torch import nn
