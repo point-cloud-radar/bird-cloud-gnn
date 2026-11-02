@@ -1,4 +1,5 @@
 """Tests for cross_validation"""
+
 from torch import nn
 from bird_cloud_gnn.cross_validation import kfold_evaluate
 from bird_cloud_gnn.cross_validation import leave_one_origin_out_evaluate

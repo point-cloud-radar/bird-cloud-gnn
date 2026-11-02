@@ -1,5 +1,5 @@
-"""Module for early stopping class
-"""
+"""Module for early stopping class"""
+
 import numpy as np
 
 
